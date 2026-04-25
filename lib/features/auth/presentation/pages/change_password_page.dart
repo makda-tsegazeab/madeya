@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../../data/auth_service.dart';
 import '../../data/token_storage.dart';
-import 'verify_reset_code_page.dart';
+import 'vehicle_owner_login_page.dart'; // Or redirect to main login
 
-class ForgotPasswordPage extends StatefulWidget {
-  const ForgotPasswordPage({super.key});
+class ChangePasswordPage extends StatefulWidget {
+  const ChangePasswordPage({super.key});
 
-  static const String routeName = '/forgot-password';
+  static const String routeName = '/change-password';
 
   @override
-  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+  State<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
 
-class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+class _ChangePasswordPageState extends State<ChangePasswordPage> {
   static const Color _bg = Color(0xFFF1F3F7);
   static const Color _blue = Color(0xFF0C4F8D);
   static const Color _textDark = Color(0xFF2E3644);
@@ -22,11 +22,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   static const Color _inputText = Color(0xFF6C7484);
 
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   late final AuthService _authService;
 
   bool _isLoading = false;
   String? _errorText;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
+  String? _email;
+  String? _code;
 
   @override
   void initState() {
@@ -35,12 +41,26 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    _email = args?['email'] as String?;
+    _code = args?['code'] as String?;
+  }
+
+  @override
   void dispose() {
-    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _sendCode() async {
+  Future<void> _resetPassword() async {
+    if (_email == null || _code == null) {
+      setState(() => _errorText = 'Invalid reset session. Please start over.');
+      return;
+    }
+
     FocusScope.of(context).unfocus();
     setState(() => _errorText = null);
 
@@ -48,18 +68,25 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
     setState(() => _isLoading = true);
     try {
-      await _authService.forgetPassword(_emailController.text.trim());
-      
+      await _authService.resetPassword(
+        email: _email!,
+        code: _code!,
+        newPassword: _passwordController.text,
+      );
+
       if (!mounted) return;
-      Navigator.of(context).pushNamed(
-        VerifyResetCodePage.routeName,
-        arguments: _emailController.text.trim(),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password updated successfully! Please login.')),
+      );
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/role-selection', // Fallback route, user can select role and login
+        (route) => false,
       );
     } on AuthException catch (e) {
       setState(() => _errorText = e.message);
     } catch (_) {
       setState(() {
-        _errorText = 'Failed to send reset code. Please try again.';
+        _errorText = 'Failed to reset password. Please try again.';
       });
     } finally {
       if (mounted) {
@@ -111,7 +138,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Forgot Password',
+                  'New Password',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: _blue,
@@ -123,7 +150,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Enter your email address and we will send you a code to reset your password.',
+                  'Please enter your new password below.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: _textDark,
@@ -158,7 +185,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       const Padding(
                         padding: EdgeInsets.only(left: 6),
                         child: Text(
-                          'EMAIL',
+                          'NEW PASSWORD',
                           style: TextStyle(
                             color: Color(0xFF2E3644),
                             fontSize: 11,
@@ -178,39 +205,128 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         child: Row(
                           children: [
                             const Icon(
-                              Icons.email_outlined,
+                              Icons.lock_outline_rounded,
                               color: _inputIcon,
                               size: 18,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: TextFormField(
-                                controller: _emailController,
+                                controller: _passwordController,
                                 enabled: !_isLoading,
-                                keyboardType: TextInputType.emailAddress,
-                                textInputAction: TextInputAction.done,
-                                onFieldSubmitted: (_) => _sendCode(),
+                                obscureText: _obscurePassword,
+                                textInputAction: TextInputAction.next,
                                 style: const TextStyle(
                                   color: _inputText,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   border: InputBorder.none,
-                                  hintText: 'user@example.com',
-                                  hintStyle: TextStyle(
+                                  hintText: '••••••••',
+                                  hintStyle: const TextStyle(
                                     color: _inputText,
                                     fontSize: 14,
                                   ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscurePassword
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                      color: _inputIcon,
+                                      size: 18,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscurePassword = !_obscurePassword;
+                                      });
+                                    },
+                                    splashRadius: 20,
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
                                 ),
                                 validator: (value) {
-                                  final v = value?.trim() ?? '';
-                                  if (v.isEmpty) return 'Email is required';
-                                  final emailRegex = RegExp(
-                                    r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-                                  );
-                                  if (!emailRegex.hasMatch(v)) {
-                                    return 'Enter a valid email';
+                                  final v = value ?? '';
+                                  if (v.isEmpty) return 'Password is required';
+                                  if (v.length < 6) return 'At least 6 characters';
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 6),
+                        child: Text(
+                          'CONFIRM PASSWORD',
+                          style: TextStyle(
+                            color: Color(0xFF2E3644),
+                            fontSize: 11,
+                            letterSpacing: 1.2,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        height: 44,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: _inputBg,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.lock_outline_rounded,
+                              color: _inputIcon,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _confirmPasswordController,
+                                enabled: !_isLoading,
+                                obscureText: _obscureConfirmPassword,
+                                textInputAction: TextInputAction.done,
+                                onFieldSubmitted: (_) => _resetPassword(),
+                                style: const TextStyle(
+                                  color: _inputText,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: '••••••••',
+                                  hintStyle: const TextStyle(
+                                    color: _inputText,
+                                    fontSize: 14,
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscureConfirmPassword
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                      color: _inputIcon,
+                                      size: 18,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscureConfirmPassword =
+                                            !_obscureConfirmPassword;
+                                      });
+                                    },
+                                    splashRadius: 20,
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value != _passwordController.text) {
+                                    return 'Passwords do not match';
                                   }
                                   return null;
                                 },
@@ -219,12 +335,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _sendCode,
+                          onPressed: _isLoading ? null : _resetPassword,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _blue,
                             foregroundColor: Colors.white,
@@ -245,7 +361,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   ),
                                 )
                               : const Text(
-                                  'Send Code',
+                                  'Change Password',
                                   style: TextStyle(
                                     fontSize: 16,
                                     height: 1.0,

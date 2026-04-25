@@ -181,25 +181,24 @@ class HeroPage extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
-        horizontal: small ? 8 : 12,
-        vertical: small ? 8 : 12,
+        vertical: small ? 24 : 40,
       ),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4F7FC),
-        borderRadius: BorderRadius.circular(small ? 12 : 14),
-      ),
-      child: Container(
-        height: small ? 110 : 160,
-        width: double.infinity,
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: const Color(0xFFEEF4FB),
-          borderRadius: BorderRadius.circular(small ? 10 : 12),
-        ),
-        child: Center(
+      child: Center(
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: _primaryBlue.withOpacity(0.15),
+                blurRadius: 40,
+                spreadRadius: 10,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
           child: Image.asset(
             _logoPath,
-            height: small ? 90 : 130,
+            height: small ? 140 : 220,
             fit: BoxFit.contain,
           ),
         ),

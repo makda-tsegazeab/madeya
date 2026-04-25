@@ -71,11 +71,14 @@ class _VerifyResetCodePageState extends State<VerifyResetCodePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Code verified successfully!')),
       );
-      // Since reset password is not yet implemented, navigate back to login
-      Navigator.of(context).popUntil((route) => route.isFirst);
-    } on NetworkAuthException catch (e) {
-      setState(() => _errorText = e.message);
-    } on ServerAuthException catch (e) {
+      Navigator.of(context).pushReplacementNamed(
+        '/change-password',
+        arguments: {
+          'email': _email,
+          'code': _codeController.text.trim(),
+        },
+      );
+    } on AuthException catch (e) {
       setState(() => _errorText = e.message);
     } catch (_) {
       setState(() {

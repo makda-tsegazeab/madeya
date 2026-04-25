@@ -66,6 +66,7 @@ abstract class AuthService {
 
   Future<void> forgetPassword(String email);
   Future<bool> verifyResetCode(String email, String code);
+  Future<void> resetPassword({required String email, required String code, required String newPassword});
 }
 
 class AuthServiceImpl implements AuthService {
@@ -161,7 +162,7 @@ class AuthServiceImpl implements AuthService {
 
   @override
   Future<void> forgetPassword(String email) async {
-    final uri = Uri.parse('${AppConfig.apiBaseUrl}/auth/forget-password');
+    final uri = Uri.parse('${AppConfig.apiBaseUrl}/auth/forgot-password');
     http.Response response;
 
     try {
@@ -177,6 +178,14 @@ class AuthServiceImpl implements AuthService {
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
+      try {
+        final jsonBody = jsonDecode(response.body);
+        final message = jsonBody['message'];
+        if (message is String) throw AuthException(message);
+        if (message is List && message.isNotEmpty) throw AuthException(message.first.toString());
+      } catch (e) {
+        if (e is AuthException) rethrow;
+      }
       throw const ServerAuthException();
     }
   }
@@ -192,7 +201,6 @@ class AuthServiceImpl implements AuthService {
             uri,
             headers: const {'Content-Type': 'application/json'},
             body: jsonEncode({
-              'email': email.trim(),
               'code': code.trim(),
             }),
           )
@@ -202,6 +210,14 @@ class AuthServiceImpl implements AuthService {
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
+      try {
+        final jsonBody = jsonDecode(response.body);
+        final message = jsonBody['message'];
+        if (message is String) throw AuthException(message);
+        if (message is List && message.isNotEmpty) throw AuthException(message.first.toString());
+      } catch (e) {
+        if (e is AuthException) rethrow;
+      }
       throw const ServerAuthException();
     }
 
@@ -214,5 +230,42 @@ class AuthServiceImpl implements AuthService {
 
     final data = json?['data'] as Map<String, dynamic>?;
     return data?['valid'] == true;
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    final uri = Uri.parse('${AppConfig.apiBaseUrl}/auth/reset-password');
+    http.Response response;
+
+    try {
+      response = await _client
+          .post(
+            uri,
+            headers: const {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'code': code.trim(),
+              'password': newPassword,
+            }),
+          )
+          .timeout(AppConfig.requestTimeout);
+    } on Exception {
+      throw const NetworkAuthException();
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      try {
+        final jsonBody = jsonDecode(response.body);
+        final message = jsonBody['message'];
+        if (message is String) throw AuthException(message);
+        if (message is List && message.isNotEmpty) throw AuthException(message.first.toString());
+      } catch (e) {
+        if (e is AuthException) rethrow;
+      }
+      throw const ServerAuthException();
+    }
   }
 }

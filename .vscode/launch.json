@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Madeya Web (Disable CORS)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "-d",
+                "chrome",
+                "--web-port",
+                "3001",
+                "--web-browser-flag",
+                "--disable-web-security"
+            ]
+        }
+    ]
+}

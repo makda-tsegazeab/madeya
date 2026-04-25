@@ -8,6 +8,7 @@ import 'features/auth/presentation/pages/forgot_password_page.dart';
 import 'features/auth/presentation/pages/verify_reset_code_page.dart';
 import 'features/auth/presentation/pages/reset_password_page.dart';
 import 'features/auth/presentation/pages/change_password_page.dart';
+import 'features/announcements/presentation/pages/announcements_page.dart';
 
 void main() {
   runApp(const MadeyaApp());
@@ -37,6 +38,7 @@ class MadeyaApp extends StatelessWidget {
         VerifyResetCodePage.routeName: (_) => const VerifyResetCodePage(),
         ResetPasswordPage.routeName: (_) => const ResetPasswordPage(),
         ChangePasswordPage.routeName: (_) => const ChangePasswordPage(),
+        AnnouncementsPage.routeName: (_) => const AnnouncementsPage(),
       },
     );
   }

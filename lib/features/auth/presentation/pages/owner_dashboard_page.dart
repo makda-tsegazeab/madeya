@@ -4,6 +4,8 @@ import '../../data/token_storage.dart';
 import '../../../vehicles/data/vehicle_model.dart';
 import '../../../vehicles/data/vehicle_service.dart';
 import '../../../stations/presentation/pages/stations_page.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../../announcements/data/announcement_service.dart';
 
 class OwnerDashboardPage extends StatefulWidget {
   const OwnerDashboardPage({super.key, required this.profile});
@@ -22,10 +24,13 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
   final TokenStorage _tokenStorage = SecureTokenStorage();
   final VehicleService _vehicleService = VehicleService();
+  final AnnouncementService _announcementService = AnnouncementService();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   List<Vehicle> _vehicles = [];
   bool _isLoading = true;
   String? _errorMessage;
+  int _unreadNotifications = 0;
 
   int get _registeredVehiclesCount => _vehicles.length;
   int get _activeQuotasCount =>
@@ -41,6 +46,36 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
   void initState() {
     super.initState();
     _loadVehiclesAndQuota();
+    _loadAnnouncementsCount();
+  }
+
+  Future<void> _loadAnnouncementsCount() async {
+    try {
+      final token = await _tokenStorage.readAccessToken();
+      if (token == null) return;
+      
+      final announcements = await _announcementService.getAnnouncements(token);
+      final lastReadStr = await _storage.read(key: 'last_read_announcement_time');
+      DateTime? lastReadTime;
+      if (lastReadStr != null) {
+        lastReadTime = DateTime.tryParse(lastReadStr);
+      }
+      
+      int unread = 0;
+      if (lastReadTime != null) {
+        unread = announcements.where((a) => a.createdAt.isAfter(lastReadTime!)).length;
+      } else {
+        unread = announcements.length;
+      }
+      
+      if (mounted) {
+        setState(() {
+          _unreadNotifications = unread;
+        });
+      }
+    } catch (e) {
+      // Ignore silently for the badge
+    }
   }
 
   Future<void> _loadVehiclesAndQuota() async {
@@ -71,6 +106,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
   Future<void> _refreshData() async {
     await _loadVehiclesAndQuota();
+    await _loadAnnouncementsCount();
   }
 
   @override
@@ -255,7 +291,40 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
             style: TextStyle(color: _blue, fontSize: 17, fontWeight: FontWeight.w700),
           ),
           const Spacer(),
-          const Icon(Icons.notifications, size: 17, color: Color(0xFF2E4156)),
+          GestureDetector(
+            onTap: () async {
+              await Navigator.pushNamed(context, '/announcements');
+              _loadAnnouncementsCount();
+            },
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.notifications, size: 22, color: Color(0xFF2E4156)),
+                if (_unreadNotifications > 0)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFD92D20),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        _unreadNotifications > 9 ? '9+' : _unreadNotifications.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          height: 1.0,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
           const SizedBox(width: 10),
           PopupMenuButton<String>(
             offset: const Offset(0, 40),

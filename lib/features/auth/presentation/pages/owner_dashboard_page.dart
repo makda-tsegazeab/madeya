@@ -257,18 +257,73 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
           const Spacer(),
           const Icon(Icons.notifications, size: 17, color: Color(0xFF2E4156)),
           const SizedBox(width: 10),
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF77AEE9), width: 1.3),
-              color: const Color(0xFF0F1621),
-            ),
-            child: Center(
-              child: Text(
-                initials.isEmpty ? 'U' : initials.toUpperCase(),
-                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+          PopupMenuButton<String>(
+            offset: const Offset(0, 40),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            onSelected: (value) async {
+              if (value == 'change_password') {
+                Navigator.pushNamed(context, '/change-password');
+              } else if (value == 'logout') {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Logout'),
+                    content: const Text('Are you sure you want to logout?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+                          await _tokenStorage.clearAccessToken();
+                          if (context.mounted) {
+                            Navigator.pushNamedAndRemoveUntil(context, '/role-selection', (route) => false);
+                          }
+                        },
+                        child: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(
+                value: 'change_password',
+                child: Row(
+                  children: [
+                    Icon(Icons.lock_outline, color: _blue, size: 20),
+                    SizedBox(width: 10),
+                    Text('Change Password', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Color(0xFFD92D20), size: 20),
+                    SizedBox(width: 10),
+                    Text('Logout', style: TextStyle(color: Color(0xFFD92D20), fontWeight: FontWeight.w600, fontSize: 14)),
+                  ],
+                ),
+              ),
+            ],
+            child: Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF77AEE9), width: 1.3),
+                color: const Color(0xFF0F1621),
+              ),
+              child: Center(
+                child: Text(
+                  initials.isEmpty ? 'U' : initials.toUpperCase(),
+                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+                ),
               ),
             ),
           ),

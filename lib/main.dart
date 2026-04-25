@@ -6,6 +6,7 @@ import 'features/auth/presentation/pages/station_worker_login_page.dart';
 import 'features/auth/presentation/pages/vehicle_owner_login_page.dart';
 import 'features/auth/presentation/pages/forgot_password_page.dart';
 import 'features/auth/presentation/pages/verify_reset_code_page.dart';
+import 'features/auth/presentation/pages/reset_password_page.dart';
 import 'features/auth/presentation/pages/change_password_page.dart';
 
 void main() {
@@ -34,6 +35,7 @@ class MadeyaApp extends StatelessWidget {
             const StationWorkerLoginPage(),
         ForgotPasswordPage.routeName: (_) => const ForgotPasswordPage(),
         VerifyResetCodePage.routeName: (_) => const VerifyResetCodePage(),
+        ResetPasswordPage.routeName: (_) => const ResetPasswordPage(),
         ChangePasswordPage.routeName: (_) => const ChangePasswordPage(),
       },
     );

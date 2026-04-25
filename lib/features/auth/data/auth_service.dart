@@ -67,6 +67,7 @@ abstract class AuthService {
   Future<void> forgetPassword(String email);
   Future<bool> verifyResetCode(String email, String code);
   Future<void> resetPassword({required String email, required String code, required String newPassword});
+  Future<void> changePassword({required String currentPassword, required String newPassword});
 }
 
 class AuthServiceImpl implements AuthService {
@@ -249,6 +250,50 @@ class AuthServiceImpl implements AuthService {
             body: jsonEncode({
               'code': code.trim(),
               'password': newPassword,
+            }),
+          )
+          .timeout(AppConfig.requestTimeout);
+    } on Exception {
+      throw const NetworkAuthException();
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      try {
+        final jsonBody = jsonDecode(response.body);
+        final message = jsonBody['message'];
+        if (message is String) throw AuthException(message);
+        if (message is List && message.isNotEmpty) throw AuthException(message.first.toString());
+      } catch (e) {
+        if (e is AuthException) rethrow;
+      }
+      throw const ServerAuthException();
+    }
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final token = await _tokenStorage.readAccessToken();
+    if (token == null) {
+      throw const AuthException('Session expired. Please login again.');
+    }
+
+    final uri = Uri.parse('${AppConfig.apiBaseUrl}/auth/change-password');
+    http.Response response;
+
+    try {
+      response = await _client
+          .put(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({
+              'currentPassword': currentPassword,
+              'newPassword': newPassword,
             }),
           )
           .timeout(AppConfig.requestTimeout);

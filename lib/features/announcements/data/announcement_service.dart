@@ -4,7 +4,8 @@ import '../../../core/config/app_config.dart';
 import 'announcement_model.dart';
 
 class AnnouncementService {
-  AnnouncementService({http.Client? client}) : _client = client ?? http.Client();
+  AnnouncementService({http.Client? client})
+    : _client = client ?? http.Client();
 
   final http.Client _client;
 
@@ -12,28 +13,32 @@ class AnnouncementService {
     final uri = Uri.parse('${AppConfig.apiBaseUrl}/owner/announcements');
 
     try {
-      final response = await _client.get(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      ).timeout(AppConfig.requestTimeout);
+      final response = await _client
+          .get(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(AppConfig.requestTimeout);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final jsonBody = jsonDecode(response.body) as Map<String, dynamic>;
         final data = jsonBody['data'] as List<dynamic>?;
-        
+
         if (data == null) return [];
 
         return data
             .map((item) => Announcement.fromJson(item as Map<String, dynamic>))
             .toList();
       } else {
-        throw Exception('Failed to load announcements: ${response.statusCode}');
+        print('Failed to load announcements: ${response.statusCode}');
+        return [];
       }
     } catch (e) {
-      throw Exception('Network or server error: $e');
+      print('Network or server error: $e');
+      return [];
     }
   }
 }

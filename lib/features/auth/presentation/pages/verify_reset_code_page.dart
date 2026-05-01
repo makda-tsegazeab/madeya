@@ -73,10 +73,7 @@ class _VerifyResetCodePageState extends State<VerifyResetCodePage> {
       );
       Navigator.of(context).pushReplacementNamed(
         '/reset-password',
-        arguments: {
-          'email': _email,
-          'code': _codeController.text.trim(),
-        },
+        arguments: {'email': _email, 'code': _codeController.text.trim()},
       );
     } on AuthException catch (e) {
       setState(() => _errorText = e.message);
@@ -173,7 +170,10 @@ class _VerifyResetCodePageState extends State<VerifyResetCodePage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFF9FAFC),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE9ECF1), width: 1.1),
+                    border: Border.all(
+                      color: const Color(0xFFE9ECF1),
+                      width: 1.1,
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,8 +257,9 @@ class _VerifyResetCodePageState extends State<VerifyResetCodePage> {
                                   width: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.4,
-                                    valueColor:
-                                        AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : const Text(

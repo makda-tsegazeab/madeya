@@ -22,8 +22,8 @@ class Announcement {
       id: json['id'] as int? ?? 0,
       title: json['title'] as String? ?? '',
       body: json['body'] as String? ?? '',
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt'] as String) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
           : DateTime.now(),
       targetScope: json['targetScope'] as String?,
       targetRole: json['targetRole'] as String?,

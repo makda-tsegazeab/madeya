@@ -1,128 +1,171 @@
 import 'package:flutter/material.dart';
 
-class Vehicle {
+class VehicleCategory {
+  const VehicleCategory({
+    required this.id,
+    required this.code,
+    required this.name,
+    required this.fuelSubsidyPercentage,
+    this.description,
+    this.isActive = true,
+  });
+
   final int id;
-  final String plateNumber;
-  final String category;
-  final String label;
+  final String code;
+  final String name;
+  final double fuelSubsidyPercentage;
+  final String? description;
   final bool isActive;
-  final DateTime createdAt;
-  final DateTime updatedAt;
 
-  double? remainingLiters;
-  double? litersLimit;
-  String? period;
+  factory VehicleCategory.fromJson(Map<String, dynamic> json) {
+    return VehicleCategory(
+      id: json['id'] as int,
+      code: json['code']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      fuelSubsidyPercentage:
+          double.tryParse(json['fuelSubsidyPercentage']?.toString() ?? '') ??
+          0.0,
+      description: json['description']?.toString(),
+      isActive: json['isActive'] == true,
+    );
+  }
+}
 
+class Vehicle {
   Vehicle({
     required this.id,
     required this.plateNumber,
-    required this.category,
+    required this.categoryId,
     required this.label,
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
+    this.category,
     this.remainingLiters,
     this.litersLimit,
     this.period,
   });
 
+  final int id;
+  final String plateNumber;
+  final int categoryId;
+  final String? label;
+  final bool isActive;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final VehicleCategory? category;
+
+  // Filled in by `getVehiclesWithQuota`.
+  double? remainingLiters;
+  double? litersLimit;
+  String? period;
+
   factory Vehicle.fromJson(Map<String, dynamic> json) {
+    final categoryJson = json['category'];
     return Vehicle(
-      id: json['id'],
-      plateNumber: json['plateNumber'],
-      category: json['category'],
-      label: json['label'],
-      isActive: json['isActive'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      id: json['id'] as int,
+      plateNumber: json['plateNumber']?.toString() ?? '',
+      categoryId: json['categoryId'] as int,
+      label: json['label']?.toString(),
+      isActive: json['isActive'] == true,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      category: categoryJson is Map<String, dynamic>
+          ? VehicleCategory.fromJson(categoryJson)
+          : null,
     );
   }
 
-  String get vehicleTitle => label;
+  String get displayTitle {
+    final lbl = label?.trim();
+    if (lbl != null && lbl.isNotEmpty) return lbl;
+    return category?.name ?? 'Vehicle';
+  }
+
+  String get categoryDisplayName => category?.name ?? 'Unknown category';
 
   String get statusText {
-    if (remainingLiters == null) return 'Unknown';
-    if (remainingLiters! <= 5) return 'Critical';
-    if (remainingLiters! <= 10) return 'Low';
+    if (!isActive) return 'Inactive';
+    final remaining = remainingLiters;
+    if (remaining == null) return 'Unknown';
+    if (remaining <= 0) return 'Depleted';
+    if (remaining <= 5) return 'Critical';
+    if (remaining <= 10) return 'Low';
     return 'Active';
   }
 
   Color get statusColor {
-    if (remainingLiters == null) return const Color(0xFF667085);
-    if (remainingLiters! <= 5) return const Color(0xFFD92D20);
-    if (remainingLiters! <= 10) return const Color(0xFFE67E22);
+    if (!isActive) return const Color(0xFF98A2B3);
+    final remaining = remainingLiters;
+    if (remaining == null) return const Color(0xFF667085);
+    if (remaining <= 0) return const Color(0xFF98A2B3);
+    if (remaining <= 5) return const Color(0xFFD92D20);
+    if (remaining <= 10) return const Color(0xFFE67E22);
     return const Color(0xFF17B26A);
   }
 
   double get progressValue {
-    if (remainingLiters == null || litersLimit == null || litersLimit == 0) {
-      return 0.0;
-    }
-    return (remainingLiters! / litersLimit!).clamp(0.0, 1.0);
+    final remaining = remainingLiters;
+    final limit = litersLimit;
+    if (remaining == null || limit == null || limit <= 0) return 0.0;
+    return (remaining / limit).clamp(0.0, 1.0);
   }
 
   Color get progressColor {
-    if (remainingLiters == null) return const Color(0xFF98A2B3);
-    if (remainingLiters! <= 5) return const Color(0xFFD92D20);
-    if (remainingLiters! <= 10) return const Color(0xFFE67E22);
+    final remaining = remainingLiters;
+    if (remaining == null) return const Color(0xFF98A2B3);
+    if (remaining <= 5) return const Color(0xFFD92D20);
+    if (remaining <= 10) return const Color(0xFFE67E22);
     return const Color(0xFF0B4D8B);
   }
+}
 
-  String get fuelType {
-    if (label.toLowerCase().contains('hilux') ||
-        label.toLowerCase().contains('toyota')) {
-      return 'Benzene';
-    }
-    if (label.toLowerCase().contains('isuzu') ||
-        label.toLowerCase().contains('fsr')) {
-      return 'Naphtha';
-    }
-    return 'Petrol';
+class QuotaPeriod {
+  const QuotaPeriod({
+    required this.period,
+    required this.remainingLiters,
+    required this.litersLimit,
+  });
+
+  final String period;
+  final double remainingLiters;
+  final double litersLimit;
+
+  factory QuotaPeriod.fromJson(Map<String, dynamic> json) {
+    return QuotaPeriod(
+      period: json['period']?.toString() ?? 'UNKNOWN',
+      remainingLiters:
+          double.tryParse(json['remainingLiters']?.toString() ?? '') ?? 0.0,
+      litersLimit:
+          double.tryParse(json['litersLimit']?.toString() ?? '') ?? 0.0,
+    );
   }
 }
 
 class QuotaResponse {
-  final int vehicleId;
-  final double remainingLiters;
-  final double litersLimit;
-  final List<QuotaPeriod> periods;
-
-  QuotaResponse({
+  const QuotaResponse({
     required this.vehicleId,
     required this.remainingLiters,
     required this.litersLimit,
     required this.periods,
   });
 
-  factory QuotaResponse.fromJson(Map<String, dynamic> json) {
-    final data = json['data'];
-    return QuotaResponse(
-      vehicleId: data['vehicleId'],
-      remainingLiters: double.parse(data['remainingLiters'].toString()),
-      litersLimit: double.parse(data['litersLimit'].toString()),
-      periods: (data['periods'] as List)
-          .map((p) => QuotaPeriod.fromJson(p))
-          .toList(),
-    );
-  }
-}
-
-class QuotaPeriod {
-  final String period;
+  final int vehicleId;
   final double remainingLiters;
   final double litersLimit;
+  final List<QuotaPeriod> periods;
 
-  QuotaPeriod({
-    required this.period,
-    required this.remainingLiters,
-    required this.litersLimit,
-  });
-
-  factory QuotaPeriod.fromJson(Map<String, dynamic> json) {
-    return QuotaPeriod(
-      period: json['period'],
-      remainingLiters: double.parse(json['remainingLiters'].toString()),
-      litersLimit: double.parse(json['litersLimit'].toString()),
+  factory QuotaResponse.fromEnvelope(Map<String, dynamic> envelope) {
+    final data = envelope['data'] as Map<String, dynamic>;
+    return QuotaResponse(
+      vehicleId: data['vehicleId'] as int,
+      remainingLiters:
+          double.tryParse(data['remainingLiters']?.toString() ?? '') ?? 0.0,
+      litersLimit:
+          double.tryParse(data['litersLimit']?.toString() ?? '') ?? 0.0,
+      periods: (data['periods'] as List<dynamic>? ?? [])
+          .map((p) => QuotaPeriod.fromJson(p as Map<String, dynamic>))
+          .toList(),
     );
   }
 }

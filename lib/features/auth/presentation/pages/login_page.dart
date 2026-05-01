@@ -184,7 +184,10 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFF9FAFC),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE9ECF1), width: 1.1),
+                    border: Border.all(
+                      color: const Color(0xFFE9ECF1),
+                      width: 1.1,
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +273,9 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                Navigator.of(context).pushNamed(ForgotPasswordPage.routeName);
+                                Navigator.of(
+                                  context,
+                                ).pushNamed(ForgotPasswordPage.routeName);
                               },
                               child: const Text(
                                 'Forgot Password?',
@@ -294,7 +299,11 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.lock_rounded, color: _inputIcon, size: 18),
+                            const Icon(
+                              Icons.lock_rounded,
+                              color: _inputIcon,
+                              size: 18,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: TextFormField(
@@ -364,8 +373,9 @@ class _LoginPageState extends State<LoginPage> {
                                   width: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.4,
-                                    valueColor:
-                                        AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : const Text(

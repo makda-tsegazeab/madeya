@@ -49,7 +49,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     setState(() => _isLoading = true);
     try {
       await _authService.forgetPassword(_emailController.text.trim());
-      
+
       if (!mounted) return;
       Navigator.of(context).pushNamed(
         VerifyResetCodePage.routeName,
@@ -150,7 +150,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFF9FAFC),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE9ECF1), width: 1.1),
+                    border: Border.all(
+                      color: const Color(0xFFE9ECF1),
+                      width: 1.1,
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,8 +243,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   width: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.4,
-                                    valueColor:
-                                        AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : const Text(

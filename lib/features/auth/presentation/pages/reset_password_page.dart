@@ -43,7 +43,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     _email = args?['email'] as String?;
     _code = args?['code'] as String?;
   }
@@ -94,10 +95,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           (route) => false,
         );
       } else {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/role-selection',
-          (route) => false,
-        );
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/role-selection', (route) => false);
       }
     } on AuthException catch (e) {
       setState(() => _errorText = e.message);
@@ -194,7 +194,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFF9FAFC),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE9ECF1), width: 1.1),
+                    border: Border.all(
+                      color: const Color(0xFFE9ECF1),
+                      width: 1.1,
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,7 +269,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                 validator: (value) {
                                   final v = value ?? '';
                                   if (v.isEmpty) return 'Password is required';
-                                  if (v.length < 6) return 'At least 6 characters';
+                                  if (v.length < 6)
+                                    return 'At least 6 characters';
                                   return null;
                                 },
                               ),
@@ -373,8 +377,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                   width: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.4,
-                                    valueColor:
-                                        AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : const Text(

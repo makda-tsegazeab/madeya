@@ -7,9 +7,8 @@ abstract class TokenStorage {
 }
 
 class SecureTokenStorage implements TokenStorage {
-  SecureTokenStorage({
-    FlutterSecureStorage? storage,
-  }) : _storage = storage ?? const FlutterSecureStorage();
+  SecureTokenStorage({FlutterSecureStorage? storage})
+    : _storage = storage ?? const FlutterSecureStorage();
 
   static const _accessTokenKey = 'access_token';
   final FlutterSecureStorage _storage;

@@ -30,10 +30,7 @@ class AuthUserProfile {
 }
 
 class AuthSession {
-  const AuthSession({
-    required this.accessToken,
-    required this.user,
-  });
+  const AuthSession({required this.accessToken, required this.user});
 
   final String accessToken;
   final AuthUserProfile user;
@@ -50,33 +47,35 @@ class InvalidCredentialsException extends AuthException {
 
 class NetworkAuthException extends AuthException {
   const NetworkAuthException()
-      : super('Unable to reach server. Check your connection and try again.');
+    : super('Unable to reach server. Check your connection and try again.');
 }
 
 class ServerAuthException extends AuthException {
   const ServerAuthException()
-      : super('Something went wrong on the server. Please try again.');
+    : super('Something went wrong on the server. Please try again.');
 }
 
 abstract class AuthService {
-  Future<AuthSession> login({
-    required String email,
-    required String password,
-  });
+  Future<AuthSession> login({required String email, required String password});
 
   Future<void> forgetPassword(String email);
   Future<bool> verifyResetCode(String email, String code);
-  Future<void> resetPassword({required String email, required String code, required String newPassword});
-  Future<void> changePassword({required String currentPassword, required String newPassword});
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  });
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
   Future<void> logout();
 }
 
 class AuthServiceImpl implements AuthService {
-  AuthServiceImpl({
-    required TokenStorage tokenStorage,
-    http.Client? client,
-  })  : _tokenStorage = tokenStorage,
-        _client = client ?? http.Client();
+  AuthServiceImpl({required TokenStorage tokenStorage, http.Client? client})
+    : _tokenStorage = tokenStorage,
+      _client = client ?? http.Client();
 
   final TokenStorage _tokenStorage;
   final http.Client _client;
@@ -94,10 +93,7 @@ class AuthServiceImpl implements AuthService {
           .post(
             uri,
             headers: const {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'email': email.trim(),
-              'password': password,
-            }),
+            body: jsonEncode({'email': email.trim(), 'password': password}),
           )
           .timeout(AppConfig.requestTimeout);
     } on Exception {
@@ -115,7 +111,9 @@ class AuthServiceImpl implements AuthService {
       throw const InvalidCredentialsException();
     }
 
-    if (response.statusCode < 200 || response.statusCode >= 300 || json == null) {
+    if (response.statusCode < 200 ||
+        response.statusCode >= 300 ||
+        json == null) {
       throw const ServerAuthException();
     }
 
@@ -184,7 +182,8 @@ class AuthServiceImpl implements AuthService {
         final jsonBody = jsonDecode(response.body);
         final message = jsonBody['message'];
         if (message is String) throw AuthException(message);
-        if (message is List && message.isNotEmpty) throw AuthException(message.first.toString());
+        if (message is List && message.isNotEmpty)
+          throw AuthException(message.first.toString());
       } catch (e) {
         if (e is AuthException) rethrow;
       }
@@ -202,9 +201,7 @@ class AuthServiceImpl implements AuthService {
           .post(
             uri,
             headers: const {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'code': code.trim(),
-            }),
+            body: jsonEncode({'code': code.trim()}),
           )
           .timeout(AppConfig.requestTimeout);
     } on Exception {
@@ -216,7 +213,8 @@ class AuthServiceImpl implements AuthService {
         final jsonBody = jsonDecode(response.body);
         final message = jsonBody['message'];
         if (message is String) throw AuthException(message);
-        if (message is List && message.isNotEmpty) throw AuthException(message.first.toString());
+        if (message is List && message.isNotEmpty)
+          throw AuthException(message.first.toString());
       } catch (e) {
         if (e is AuthException) rethrow;
       }
@@ -248,10 +246,7 @@ class AuthServiceImpl implements AuthService {
           .post(
             uri,
             headers: const {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'code': code.trim(),
-              'password': newPassword,
-            }),
+            body: jsonEncode({'code': code.trim(), 'password': newPassword}),
           )
           .timeout(AppConfig.requestTimeout);
     } on Exception {
@@ -263,7 +258,8 @@ class AuthServiceImpl implements AuthService {
         final jsonBody = jsonDecode(response.body);
         final message = jsonBody['message'];
         if (message is String) throw AuthException(message);
-        if (message is List && message.isNotEmpty) throw AuthException(message.first.toString());
+        if (message is List && message.isNotEmpty)
+          throw AuthException(message.first.toString());
       } catch (e) {
         if (e is AuthException) rethrow;
       }
@@ -307,7 +303,8 @@ class AuthServiceImpl implements AuthService {
         final jsonBody = jsonDecode(response.body);
         final message = jsonBody['message'];
         if (message is String) throw AuthException(message);
-        if (message is List && message.isNotEmpty) throw AuthException(message.first.toString());
+        if (message is List && message.isNotEmpty)
+          throw AuthException(message.first.toString());
       } catch (e) {
         if (e is AuthException) rethrow;
       }

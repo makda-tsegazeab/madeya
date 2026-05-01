@@ -49,7 +49,10 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
       // Mark latest as read by saving timestamp
       if (items.isNotEmpty) {
         final latestTime = items.first.createdAt.toIso8601String();
-        await _storage.write(key: 'last_read_announcement_time', value: latestTime);
+        await _storage.write(
+          key: 'last_read_announcement_time',
+          value: latestTime,
+        );
       }
 
       setState(() {
@@ -71,7 +74,11 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
       appBar: AppBar(
         title: const Text(
           'Announcements',
-          style: TextStyle(color: _blue, fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: _blue,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -96,11 +103,19 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: Color(0xFFD92D20), size: 48),
+              const Icon(
+                Icons.error_outline,
+                color: Color(0xFFD92D20),
+                size: 48,
+              ),
               const SizedBox(height: 16),
               Text(
                 'Failed to load announcements',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF1D4268)),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1D4268),
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -111,9 +126,12 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _loadAnnouncements,
-                style: ElevatedButton.styleFrom(backgroundColor: _blue, foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _blue,
+                  foregroundColor: Colors.white,
+                ),
                 child: const Text('Retry'),
-              )
+              ),
             ],
           ),
         ),
@@ -128,11 +146,19 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
           const Center(
             child: Column(
               children: [
-                Icon(Icons.campaign_outlined, size: 64, color: Color(0xFF98A2B3)),
+                Icon(
+                  Icons.campaign_outlined,
+                  size: 64,
+                  color: Color(0xFF98A2B3),
+                ),
                 SizedBox(height: 16),
                 Text(
                   'No announcements yet',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF344054)),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF344054),
+                  ),
                 ),
                 SizedBox(height: 8),
                 Text(
@@ -158,8 +184,9 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
   }
 
   Widget _buildAnnouncementCard(Announcement announcement) {
-    final date = '${announcement.createdAt.day.toString().padLeft(2, '0')}/${announcement.createdAt.month.toString().padLeft(2, '0')}/${announcement.createdAt.year}';
-    
+    final date =
+        '${announcement.createdAt.day.toString().padLeft(2, '0')}/${announcement.createdAt.month.toString().padLeft(2, '0')}/${announcement.createdAt.year}';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -186,7 +213,11 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
                   color: const Color(0xFFF0F5FA),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.campaign_rounded, color: _blue, size: 24),
+                child: const Icon(
+                  Icons.campaign_rounded,
+                  color: _blue,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(

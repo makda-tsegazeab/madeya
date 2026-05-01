@@ -28,7 +28,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   bool _isLoading = false;
   String? _errorText;
-  
+
   bool _obscureCurrentPassword = true;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
@@ -112,7 +112,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           ),
           child: Row(
             children: [
-              const Icon(Icons.lock_outline_rounded, color: _inputIcon, size: 18),
+              const Icon(
+                Icons.lock_outline_rounded,
+                color: _inputIcon,
+                size: 18,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: TextFormField(
@@ -132,7 +136,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     hintStyle: const TextStyle(color: _inputText, fontSize: 14),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        obscureText
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                         color: _inputIcon,
                         size: 18,
                       ),
@@ -157,7 +163,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     return Scaffold(
       backgroundColor: _bg,
       appBar: AppBar(
-        title: const Text('Change Password', style: TextStyle(color: _blue, fontSize: 18, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Change Password',
+          style: TextStyle(
+            color: _blue,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: _blue),
@@ -188,7 +201,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFF9FAFC),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE9ECF1), width: 1.1),
+                    border: Border.all(
+                      color: const Color(0xFFE9ECF1),
+                      width: 1.1,
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,15 +213,22 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         label: 'CURRENT PASSWORD',
                         controller: _currentPasswordController,
                         obscureText: _obscureCurrentPassword,
-                        toggleObscure: () => setState(() => _obscureCurrentPassword = !_obscureCurrentPassword),
-                        validator: (value) => (value == null || value.isEmpty) ? 'Current password is required' : null,
+                        toggleObscure: () => setState(
+                          () => _obscureCurrentPassword =
+                              !_obscureCurrentPassword,
+                        ),
+                        validator: (value) => (value == null || value.isEmpty)
+                            ? 'Current password is required'
+                            : null,
                       ),
                       const SizedBox(height: 16),
                       _buildPasswordField(
                         label: 'NEW PASSWORD',
                         controller: _newPasswordController,
                         obscureText: _obscureNewPassword,
-                        toggleObscure: () => setState(() => _obscureNewPassword = !_obscureNewPassword),
+                        toggleObscure: () => setState(
+                          () => _obscureNewPassword = !_obscureNewPassword,
+                        ),
                         validator: (value) {
                           final v = value ?? '';
                           if (v.isEmpty) return 'New password is required';
@@ -218,11 +241,15 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         label: 'CONFIRM NEW PASSWORD',
                         controller: _confirmPasswordController,
                         obscureText: _obscureConfirmPassword,
-                        toggleObscure: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                        toggleObscure: () => setState(
+                          () => _obscureConfirmPassword =
+                              !_obscureConfirmPassword,
+                        ),
                         textInputAction: TextInputAction.done,
                         onFieldSubmitted: (_) => _changePassword(),
                         validator: (value) {
-                          if (value != _newPasswordController.text) return 'Passwords do not match';
+                          if (value != _newPasswordController.text)
+                            return 'Passwords do not match';
                           return null;
                         },
                       ),
@@ -247,7 +274,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                                   width: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.4,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : const Text(

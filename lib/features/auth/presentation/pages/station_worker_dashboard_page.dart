@@ -15,10 +15,12 @@ class StationWorkerDashboardPage extends StatefulWidget {
   final AuthUserProfile profile;
 
   @override
-  State<StationWorkerDashboardPage> createState() => _StationWorkerDashboardPageState();
+  State<StationWorkerDashboardPage> createState() =>
+      _StationWorkerDashboardPageState();
 }
 
-class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage> {
+class _StationWorkerDashboardPageState
+    extends State<StationWorkerDashboardPage> {
   static const Color _bg = Color(0xFFF2F4F7);
   static const Color _blue = Color(0xFF0B4D8B);
 
@@ -55,7 +57,9 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
       }
 
       final response = await http.get(
-        Uri.parse('${AppConfig.apiBaseUrl}/station-manager/stations/${widget.profile.stationId}'),
+        Uri.parse(
+          '${AppConfig.apiBaseUrl}/station-manager/stations/${widget.profile.stationId}',
+        ),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -95,10 +99,17 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
               Navigator.pop(ctx);
               await _tokenStorage.clearAccessToken();
               if (context.mounted) {
-                Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login',
+                  (route) => false,
+                );
               }
             },
-            child: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Logout',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -107,7 +118,8 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
 
   @override
   Widget build(BuildContext context) {
-    final fullName = '${widget.profile.firstName} ${widget.profile.lastName}'.trim();
+    final fullName = '${widget.profile.firstName} ${widget.profile.lastName}'
+        .trim();
 
     return Scaffold(
       backgroundColor: _bg,
@@ -119,7 +131,10 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
               child: RefreshIndicator(
                 onRefresh: _loadStationInfo,
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   children: [
                     _buildGreeting(fullName),
                     const SizedBox(height: 14),
@@ -139,7 +154,10 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
   }
 
   Widget _buildTopBar(String fullName) {
-    final initials = (widget.profile.firstName.isNotEmpty ? widget.profile.firstName[0] : '') +
+    final initials =
+        (widget.profile.firstName.isNotEmpty
+            ? widget.profile.firstName[0]
+            : '') +
         (widget.profile.lastName.isNotEmpty ? widget.profile.lastName[0] : '');
     return Container(
       color: _bg,
@@ -150,12 +168,18 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
           const SizedBox(width: 10),
           const Text(
             'Mekelle Fuel Tracker',
-            style: TextStyle(color: Color(0xFF0B4D8B), fontSize: 17, fontWeight: FontWeight.w700),
+            style: TextStyle(
+              color: Color(0xFF0B4D8B),
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const Spacer(),
           PopupMenuButton<String>(
             offset: const Offset(0, 40),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             onSelected: (value) async {
               if (value == 'change_password') {
                 Navigator.pushNamed(context, '/change-password');
@@ -168,9 +192,19 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
                 value: 'change_password',
                 child: Row(
                   children: [
-                    Icon(Icons.lock_outline, color: Color(0xFF0B4D8B), size: 20),
+                    Icon(
+                      Icons.lock_outline,
+                      color: Color(0xFF0B4D8B),
+                      size: 20,
+                    ),
                     SizedBox(width: 10),
-                    Text('Change Password', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(
+                      'Change Password',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -180,7 +214,14 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
                   children: [
                     Icon(Icons.logout, color: Color(0xFFD92D20), size: 20),
                     SizedBox(width: 10),
-                    Text('Logout', style: TextStyle(color: Color(0xFFD92D20), fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(
+                      'Logout',
+                      style: TextStyle(
+                        color: Color(0xFFD92D20),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -196,7 +237,11 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
               child: Center(
                 child: Text(
                   initials.isEmpty ? 'W' : initials.toUpperCase(),
-                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -318,7 +363,11 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
                   color: const Color(0xFFE9EFF7),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.local_gas_station, color: Color(0xFF0B4D8B), size: 24),
+                child: const Icon(
+                  Icons.local_gas_station,
+                  color: Color(0xFF0B4D8B),
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -351,13 +400,9 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(
-                child: _buildInfoItem('Fuel Status', fuelStatus),
-              ),
+              Expanded(child: _buildInfoItem('Fuel Status', fuelStatus)),
               const SizedBox(width: 10),
-              Expanded(
-                child: _buildInfoItem('Remaining', '$remainingFuel L'),
-              ),
+              Expanded(child: _buildInfoItem('Remaining', '$remainingFuel L')),
             ],
           ),
         ],
@@ -445,10 +490,7 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
           const SizedBox(height: 4),
           const Text(
             'We\'re preparing queue management tools for you.',
-            style: TextStyle(
-              fontSize: 12,
-              color: Color(0xFF92400E),
-            ),
+            style: TextStyle(fontSize: 12, color: Color(0xFF92400E)),
             textAlign: TextAlign.center,
           ),
         ],
@@ -462,7 +504,12 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
       child: Row(
         children: [
-          _navItem(icon: Icons.home_filled, label: 'HOME', active: true, onTap: () {}),
+          _navItem(
+            icon: Icons.home_filled,
+            label: 'HOME',
+            active: true,
+            onTap: () {},
+          ),
           _navItem(
             icon: Icons.local_gas_station_rounded,
             label: 'STATIONS',
@@ -495,7 +542,12 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
     );
   }
 
-  Widget _navItem({required IconData icon, required String label, bool active = false, VoidCallback? onTap}) {
+  Widget _navItem({
+    required IconData icon,
+    required String label,
+    bool active = false,
+    VoidCallback? onTap,
+  }) {
     return Expanded(
       child: InkWell(
         onTap: onTap,
@@ -510,7 +562,11 @@ class _StationWorkerDashboardPageState extends State<StationWorkerDashboardPage>
                 color: active ? const Color(0xFFD9E5F5) : Colors.transparent,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, size: 22, color: active ? _blue : const Color(0xFF94A3B8)),
+              child: Icon(
+                icon,
+                size: 22,
+                color: active ? _blue : const Color(0xFF94A3B8),
+              ),
             ),
             const SizedBox(height: 2),
             Text(

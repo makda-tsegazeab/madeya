@@ -68,6 +68,7 @@ abstract class AuthService {
   Future<bool> verifyResetCode(String email, String code);
   Future<void> resetPassword({required String email, required String code, required String newPassword});
   Future<void> changePassword({required String currentPassword, required String newPassword});
+  Future<void> logout();
 }
 
 class AuthServiceImpl implements AuthService {
@@ -312,5 +313,10 @@ class AuthServiceImpl implements AuthService {
       }
       throw const ServerAuthException();
     }
+  }
+
+  @override
+  Future<void> logout() async {
+    await _tokenStorage.clearAccessToken();
   }
 }

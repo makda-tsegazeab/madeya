@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 
 import '../../data/auth_service.dart';
 import '../../data/token_storage.dart';
+import '../pages/owner_dashboard_page.dart';
+import '../pages/station_worker_dashboard_page.dart';
 import 'forgot_password_page.dart';
 
-class StationWorkerLoginPage extends StatefulWidget {
-  const StationWorkerLoginPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
-  static const String routeName = '/worker-login';
+  static const String routeName = '/login';
 
   @override
-  State<StationWorkerLoginPage> createState() => _StationWorkerLoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _StationWorkerLoginPageState extends State<StationWorkerLoginPage> {
+class _LoginPageState extends State<LoginPage> {
   static const Color _bg = Color(0xFFF1F3F7);
   static const Color _blue = Color(0xFF0C4F8D);
   static const Color _textDark = Color(0xFF2E3644);
@@ -56,18 +58,29 @@ class _StationWorkerLoginPageState extends State<StationWorkerLoginPage> {
         password: _passwordController.text,
       );
 
-      if (session.user.role != 'STATION_WORKER') {
-        setState(() {
-          _errorText = 'This account is not a Station Worker account.';
-        });
-        return;
-      }
-
       if (!mounted) return;
-      // TODO: Navigate to Station Worker Dashboard
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login successful! Welcome to the Station Worker Dashboard.')),
-      );
+
+      switch (session.user.role) {
+        case 'VEHICLE_OWNER':
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => OwnerDashboardPage(profile: session.user),
+            ),
+          );
+          break;
+        case 'STATION_WORKER':
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => StationWorkerDashboardPage(profile: session.user),
+            ),
+          );
+          break;
+        default:
+          setState(() {
+            _errorText = 'This account type cannot access the mobile app.';
+          });
+          await _authService.logout();
+      }
     } on InvalidCredentialsException {
       setState(() => _errorText = 'Invalid email or password.');
     } on NetworkAuthException catch (e) {
@@ -132,7 +145,7 @@ class _StationWorkerLoginPageState extends State<StationWorkerLoginPage> {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Station Worker Login',
+                  'Mekelle Fuel Tracker',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: _blue,
@@ -144,7 +157,7 @@ class _StationWorkerLoginPageState extends State<StationWorkerLoginPage> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Login to access your operational dashboard\nand manage queues.',
+                  'Sign in to access your dashboard.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: _textDark,
@@ -217,7 +230,7 @@ class _StationWorkerLoginPageState extends State<StationWorkerLoginPage> {
                                 ),
                                 decoration: const InputDecoration(
                                   border: InputBorder.none,
-                                  hintText: 'worker@example.com',
+                                  hintText: 'email@example.com',
                                   hintStyle: TextStyle(
                                     color: _inputText,
                                     fontSize: 14,

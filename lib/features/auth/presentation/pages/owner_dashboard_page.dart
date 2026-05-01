@@ -286,10 +286,10 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
         children: [
           const Icon(Icons.menu_rounded, color: _blue, size: 20),
           const SizedBox(width: 10),
-          const Text(
-            'Madeya',
-            style: TextStyle(color: _blue, fontSize: 17, fontWeight: FontWeight.w700),
-          ),
+              const Text(
+                'Mekelle Fuel Tracker',
+                style: TextStyle(color: _blue, fontSize: 17, fontWeight: FontWeight.w700),
+              ),
           const Spacer(),
           GestureDetector(
             onTap: () async {
@@ -345,10 +345,9 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                       ),
                       TextButton(
                         onPressed: () async {
-                          Navigator.pop(ctx);
                           await _tokenStorage.clearAccessToken();
                           if (context.mounted) {
-                            Navigator.pushNamedAndRemoveUntil(context, '/role-selection', (route) => false);
+                            Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
                           }
                         },
                         child: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),

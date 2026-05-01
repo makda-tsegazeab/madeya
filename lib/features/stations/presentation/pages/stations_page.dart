@@ -176,7 +176,7 @@ class _StationsPageState extends State<StationsPage> {
           const Icon(Icons.menu_rounded, color: Color(0xFF4B5563), size: 20),
           const SizedBox(width: 12),
           const Text(
-            'Madeya',
+            'Mekelle Fuel Tracker',
             style: TextStyle(
               color: _blue,
               fontSize: 18,

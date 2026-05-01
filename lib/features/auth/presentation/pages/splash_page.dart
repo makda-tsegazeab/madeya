@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'hero_page.dart';
+import 'login_page.dart';
 
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
@@ -9,6 +9,6 @@ class SplashPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const HeroPage();
+    return const LoginPage();
   }
 }

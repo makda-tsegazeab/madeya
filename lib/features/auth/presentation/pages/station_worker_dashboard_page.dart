@@ -335,7 +335,6 @@ class _StationWorkerDashboardPageState
     final address = _stationData!['address'] ?? '';
     final city = _stationData!['city'] ?? '';
     final fuelStatus = _stationData!['fuelStatus'] ?? 'UNKNOWN';
-    final remainingFuel = _stationData!['remainingFuel']?.toString() ?? '0';
 
     return Container(
       width: double.infinity,
@@ -400,9 +399,7 @@ class _StationWorkerDashboardPageState
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _buildInfoItem('Fuel Status', fuelStatus)),
-              const SizedBox(width: 10),
-              Expanded(child: _buildInfoItem('Remaining', '$remainingFuel L')),
+              Expanded(child: _buildInfoItem('Operational status', fuelStatus)),
             ],
           ),
         ],

@@ -8,7 +8,6 @@ class Station {
     this.latitude,
     this.longitude,
     this.phone,
-    this.remainingFuel,
   });
 
   final int id;
@@ -19,7 +18,6 @@ class Station {
   final String? latitude;
   final String? longitude;
   final String? phone;
-  final String? remainingFuel;
 
   factory Station.fromJson(Map<String, dynamic> json) {
     return Station(
@@ -31,20 +29,15 @@ class Station {
       latitude: json['latitude']?.toString(),
       longitude: json['longitude']?.toString(),
       phone: json['phone']?.toString(),
-      remainingFuel: json['remainingFuel']?.toString(),
     );
   }
 
   bool get acceptsQueueJoins => isActive && !queueIntakePaused;
 
+  /// Station fuel is tracked per type on the server; owners see queue intake status here.
   String get fuelStatusLabel {
-    final raw = remainingFuel;
-    if (raw == null || raw.isEmpty) return 'Unknown';
-    final value = double.tryParse(raw);
-    if (value == null) return 'Unknown';
-    if (value <= 0) return 'Out of stock';
-    if (value < 200) return 'Low';
-    return 'Available';
+    if (!acceptsQueueJoins) return 'Queue closed';
+    return 'Open';
   }
 
   String get locationSummary {

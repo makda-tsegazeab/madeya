@@ -220,11 +220,11 @@ class _StationsPageState extends State<StationsPage> {
             children: [
               Expanded(
                 child: _infoBox(
-                  title: 'FUEL',
+                  title: 'STATUS',
                   value: station.fuelStatusLabel,
-                  subtitle: station.remainingFuel != null
-                      ? '${station.remainingFuel} L'
-                      : 'Unknown quantity',
+                  subtitle: station.queueIntakePaused
+                      ? 'Intake paused at station'
+                      : 'Join queue to request fuel',
                 ),
               ),
               const SizedBox(width: 10),

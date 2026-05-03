@@ -11,9 +11,15 @@ import 'chapa_checkout_page.dart';
 import 'queue_status_page.dart';
 
 class ConfigureBookingPage extends StatefulWidget {
-  const ConfigureBookingPage({super.key, required this.station});
+  const ConfigureBookingPage({
+    super.key,
+    required this.station,
+    this.initialVehicleId,
+  });
 
   final Station station;
+  /// When set (e.g. from owner home vehicle card), this vehicle is selected first.
+  final int? initialVehicleId;
 
   @override
   State<ConfigureBookingPage> createState() => _ConfigureBookingPageState();
@@ -82,17 +88,24 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
           .where((p) => p.isActive)
           .toList();
 
+      Vehicle? pickInitial() {
+        final preId = widget.initialVehicleId;
+        if (preId != null) {
+          for (final v in vehicles) {
+            if (v.id == preId && v.isActive) return v;
+          }
+        }
+        for (final v in vehicles) {
+          if (v.isActive) return v;
+        }
+        return vehicles.isNotEmpty ? vehicles.first : null;
+      }
+
       if (!mounted) return;
       setState(() {
         _vehicles = vehicles;
         _fuelPrices = prices;
-        _selectedVehicle = vehicles
-            .where((v) => v.isActive)
-            .cast<Vehicle?>()
-            .firstWhere(
-              (_) => true,
-              orElse: () => vehicles.isNotEmpty ? vehicles.first : null,
-            );
+        _selectedVehicle = pickInitial();
         _selectedFuelPrice = prices.isNotEmpty ? prices.first : null;
         _isLoading = false;
       });

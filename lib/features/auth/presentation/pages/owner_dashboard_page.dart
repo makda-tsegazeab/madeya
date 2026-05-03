@@ -309,6 +309,10 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
     );
   }
 
+  Widget _vehiclesHeader() => const Text(
+    'Registered Vehicles',
+    style: TextStyle(color: _blue, fontSize: 21, fontWeight: FontWeight.w800),
+  );
   Widget _summaryCard(String statusText, Color statusColor, String roleText) {
     return Container(
       width: double.infinity,

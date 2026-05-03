@@ -6,7 +6,10 @@ import '../../data/station_model.dart';
 import '../../data/station_service.dart';
 
 class StationsPage extends StatefulWidget {
-  const StationsPage({super.key});
+  const StationsPage({super.key, this.prefillVehicleId});
+
+  /// When opening queue booking from a vehicle card, the booking flow selects this vehicle.
+  final int? prefillVehicleId;
 
   @override
   State<StationsPage> createState() => _StationsPageState();
@@ -249,8 +252,10 @@ class _StationsPageState extends State<StationsPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              ConfigureBookingPage(station: station),
+                          builder: (_) => ConfigureBookingPage(
+                            station: station,
+                            initialVehicleId: widget.prefillVehicleId,
+                          ),
                         ),
                       );
                     }

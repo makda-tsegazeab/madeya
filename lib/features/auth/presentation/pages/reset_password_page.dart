@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/auth_service.dart';
 import '../../data/token_storage.dart';
 import 'owner_dashboard_page.dart';
+import 'station_worker_dashboard_page.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   const ResetPasswordPage({super.key});
@@ -82,22 +83,36 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password updated successfully!')),
-      );
 
-      final role = session.user.role;
-      if (role == 'VEHICLE_OWNER') {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (_) => OwnerDashboardPage(profile: session.user),
-          ),
-          (route) => false,
-        );
-      } else {
-        Navigator.of(
-          context,
-        ).pushNamedAndRemoveUntil('/role-selection', (route) => false);
+      switch (session.user.role) {
+        case 'VEHICLE_OWNER':
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Password updated successfully!')),
+          );
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => OwnerDashboardPage(profile: session.user),
+            ),
+            (route) => false,
+          );
+          break;
+        case 'STATION_WORKER':
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Password updated successfully!')),
+          );
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) =>
+                  StationWorkerDashboardPage(profile: session.user),
+            ),
+            (route) => false,
+          );
+          break;
+        default:
+          setState(() {
+            _errorText = 'This account type cannot access the mobile app.';
+          });
+          await _authService.logout();
       }
     } on AuthException catch (e) {
       setState(() => _errorText = e.message);

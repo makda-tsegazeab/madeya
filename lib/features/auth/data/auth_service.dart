@@ -3,38 +3,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../../core/config/app_config.dart';
+import 'auth_models.dart';
+import 'auth_session_restore.dart';
 import 'token_storage.dart';
 
-class AuthUserProfile {
-  const AuthUserProfile({
-    required this.id,
-    required this.email,
-    required this.firstName,
-    required this.lastName,
-    required this.role,
-    required this.stationId,
-    required this.isActive,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  final String id;
-  final String email;
-  final String firstName;
-  final String lastName;
-  final String role;
-  final String? stationId;
-  final bool isActive;
-  final String createdAt;
-  final String updatedAt;
-}
-
-class AuthSession {
-  const AuthSession({required this.accessToken, required this.user});
-
-  final String accessToken;
-  final AuthUserProfile user;
-}
+export 'auth_models.dart';
 
 class AuthException implements Exception {
   const AuthException(this.message);
@@ -57,6 +30,8 @@ class ServerAuthException extends AuthException {
 
 abstract class AuthService {
   Future<AuthSession> login({required String email, required String password});
+
+  Future<AuthSession?> restoreSession();
 
   Future<void> forgetPassword(String email);
   Future<bool> verifyResetCode(String email, String code);
@@ -125,40 +100,18 @@ class AuthServiceImpl implements AuthService {
       throw const ServerAuthException();
     }
 
-    final id = user['id']?.toString();
-    final role = user['role']?.toString();
-    final emailValue = user['email']?.toString();
-    final firstName = user['firstName']?.toString();
-    final lastName = user['lastName']?.toString();
-    final isActive = user['isActive'] == true;
-    final createdAt = user['createdAt']?.toString();
-    final updatedAt = user['updatedAt']?.toString();
-
-    if (id == null ||
-        role == null ||
-        emailValue == null ||
-        firstName == null ||
-        lastName == null ||
-        createdAt == null ||
-        updatedAt == null) {
+    final profile = profileFromUserJson(user);
+    if (profile == null) {
       throw const ServerAuthException();
     }
-
-    final profile = AuthUserProfile(
-      id: id,
-      email: emailValue,
-      firstName: firstName,
-      lastName: lastName,
-      role: role,
-      stationId: user['stationId']?.toString(),
-      isActive: isActive,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-    );
 
     await _tokenStorage.saveAccessToken(accessToken);
     return AuthSession(accessToken: accessToken, user: profile);
   }
+
+  @override
+  Future<AuthSession?> restoreSession() =>
+      restoreAuthSession(_tokenStorage, client: _client);
 
   @override
   Future<void> forgetPassword(String email) async {

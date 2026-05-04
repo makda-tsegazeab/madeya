@@ -162,8 +162,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                       const SizedBox(height: 14),
                       _joinQueueButton(),
                       const SizedBox(height: 14),
-                      _vehiclesHeader(),
-                      const SizedBox(height: 10),
                       _buildVehiclesList(),
                       const SizedBox(height: 12),
                       _noticeCard(),
@@ -192,8 +190,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          const Icon(Icons.menu_rounded, color: _blue, size: 20),
-          const SizedBox(width: 10),
           const Text(
             'Mekelle Fuel Tracker',
             style: TextStyle(
@@ -309,10 +305,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
     );
   }
 
-  Widget _vehiclesHeader() => const Text(
-    'Registered Vehicles',
-    style: TextStyle(color: _blue, fontSize: 21, fontWeight: FontWeight.w800),
-  );
   Widget _summaryCard(String statusText, Color statusColor, String roleText) {
     return Container(
       width: double.infinity,
@@ -453,11 +445,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
       ),
     );
   }
-
-  Widget _vehiclesHeader() => const Text(
-    'Registered Vehicles',
-    style: TextStyle(color: _blue, fontSize: 21, fontWeight: FontWeight.w800),
-  );
 
   Widget _buildVehiclesList() {
     if (_isLoading) {

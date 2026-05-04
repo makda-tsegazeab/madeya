@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../auth/data/token_storage.dart';
 import '../../data/queue_models.dart';
@@ -431,6 +432,38 @@ class _QueueStatusPageState extends State<QueueStatusPage>
             ],
           ),
           const SizedBox(height: 10),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: QrImageView(
+                data: token,
+                version: QrVersions.auto,
+                size: 160,
+                backgroundColor: Colors.white,
+                errorStateBuilder: (ctx, err) {
+                  return const SizedBox(
+                    width: 160,
+                    height: 160,
+                    child: Center(
+                      child: Text(
+                        'QR unavailable',
+                        style: TextStyle(
+                          color: Color(0xFF111827),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           SelectableText(
             shortened,
             style: const TextStyle(

@@ -11,6 +11,7 @@ import '../../../stations/presentation/pages/stations_page.dart';
 import '../../../transactions/presentation/pages/history_page.dart';
 import '../../../vehicles/data/vehicle_model.dart';
 import '../../../vehicles/data/vehicle_service.dart';
+import '../../../vehicles/presentation/pages/vehicle_detail_page.dart';
 
 class OwnerDashboardPage extends StatefulWidget {
   const OwnerDashboardPage({super.key, required this.profile});
@@ -159,8 +160,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                       _summaryCard(statusText, statusColor, roleText),
                       const SizedBox(height: 14),
                       _quotaCard(),
-                      const SizedBox(height: 14),
-                      _joinQueueButton(),
                       const SizedBox(height: 14),
                       _buildVehiclesList(),
                       const SizedBox(height: 12),
@@ -419,31 +418,14 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
     );
   }
 
-  Widget _joinQueueButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: ElevatedButton.icon(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const StationsPage()),
-          );
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _blue,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
-        icon: const Icon(Icons.groups_2_rounded, size: 18),
-        label: const Text(
-          'Join Queue',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
-        ),
-      ),
-    );
+  String _allowanceRemainingFooter(Vehicle v) {
+    final rem = v.remainingLiters;
+    final lim = v.litersLimit;
+    if (rem == null || lim == null || lim <= 0) {
+      return 'Allowance data unavailable';
+    }
+    final pct = ((rem / lim) * 100).clamp(0.0, 100.0).round();
+    return '$pct% of your current allowance remaining';
   }
 
   Widget _buildVehiclesList() {
@@ -468,46 +450,262 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
       );
     }
     return Column(
-      children: _vehicles.map((v) {
-        return Container(
-          width: double.infinity,
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+      children: _vehicles.map(_vehicleCard).toList(),
+    );
+  }
+
+  Widget _vehicleCard(Vehicle v) {
+    final accent = v.progressColor;
+    final canJoin = v.isActive && (v.remainingLiters ?? 0) > 0;
+
+    void openDetails() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => VehicleDetailPage(
+            vehicleId: v.id,
+            previewPlate: v.plateNumber,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                v.plateNumber,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
+        ),
+      );
+    }
+
+    void openStationsForVehicle() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => StationsPage(prefillVehicleId: v.id),
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 5, color: accent),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8F2FC),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.local_taxi_rounded,
+                            color: _blue,
+                            size: 26,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                v.plateNumber,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 17,
+                                  color: _dark,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                v.displayTitle,
+                                style: const TextStyle(
+                                  color: _grey,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: openDetails,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 36,
+                            minHeight: 36,
+                          ),
+                          icon: Icon(
+                            Icons.info_outline_rounded,
+                            color: _grey.withOpacity(0.85),
+                            size: 22,
+                          ),
+                          tooltip: 'Vehicle details',
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: v.statusColor.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.circle, size: 7, color: v.statusColor),
+                          const SizedBox(width: 6),
+                          Text(
+                            v.statusText,
+                            style: TextStyle(
+                              color: v.statusColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Fuel allowance',
+                      style: TextStyle(
+                        color: _grey,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    RichText(
+                      text: TextSpan(
+                        style: const TextStyle(
+                          color: _dark,
+                          fontSize: 15,
+                          height: 1.35,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: v.remainingLiters?.toStringAsFixed(2) ?? '—',
+                            style: const TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                          TextSpan(
+                            text:
+                                ' / ${v.litersLimit?.toStringAsFixed(2) ?? '—'} L',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Quota period: ${v.period ?? '—'}',
+                      style: const TextStyle(
+                        color: _grey,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value: v.progressValue,
+                        minHeight: 8,
+                        backgroundColor: const Color(0xFFE5E7EB),
+                        valueColor: AlwaysStoppedAnimation<Color>(accent),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      _allowanceRemainingFooter(v),
+                      style: TextStyle(
+                        color: _grey.withOpacity(0.95),
+                        fontSize: 11,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: openDetails,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: _blue,
+                              side: const BorderSide(
+                                color: Color(0xFF77AEE9),
+                                width: 1.2,
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              'Details',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: canJoin ? openStationsForVehicle : null,
+                            icon: const Icon(Icons.groups_2_rounded, size: 18),
+                            label: const Text(
+                              'Join Queue',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _blue,
+                              foregroundColor: Colors.white,
+                              disabledBackgroundColor: const Color(0xFFE5E7EB),
+                              disabledForegroundColor: const Color(0xFF9CA3AF),
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(v.displayTitle, style: const TextStyle(color: _grey)),
-              const SizedBox(height: 8),
-              Text(
-                'Remaining ${v.remainingLiters?.toStringAsFixed(2) ?? '—'} / ${v.litersLimit?.toStringAsFixed(2) ?? '—'} L',
-                style: const TextStyle(
-                  color: _dark,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 6),
-              LinearProgressIndicator(
-                value: v.progressValue,
-                minHeight: 8,
-                backgroundColor: const Color(0xFFE5E7EB),
-                valueColor: AlwaysStoppedAnimation<Color>(v.progressColor),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

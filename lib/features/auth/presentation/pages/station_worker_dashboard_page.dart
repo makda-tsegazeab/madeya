@@ -164,8 +164,6 @@ class _StationWorkerDashboardPageState
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
       child: Row(
         children: [
-          const Icon(Icons.menu_rounded, color: Color(0xFF0B4D8B), size: 20),
-          const SizedBox(width: 10),
           const Text(
             'Mekelle Fuel Tracker',
             style: TextStyle(

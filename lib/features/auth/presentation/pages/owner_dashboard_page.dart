@@ -41,13 +41,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
   String? _errorMessage;
   int _unreadNotifications = 0;
 
-  double get _totalRemainingQuota =>
-      _vehicles.fold(0, (sum, v) => sum + (v.remainingLiters ?? 0));
-  double get _totalQuotaLimit =>
-      _vehicles.fold(0, (sum, v) => sum + (v.litersLimit ?? 0));
-  bool get _isEligibleToJoin =>
-      _vehicles.any((v) => (v.remainingLiters ?? 0) > 0);
-
   @override
   void initState() {
     super.initState();
@@ -100,13 +93,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
   Widget build(BuildContext context) {
     final fullName = '${widget.profile.firstName} ${widget.profile.lastName}'
         .trim();
-    final roleText = widget.profile.role.replaceAll('_', ' ');
-    final statusText = widget.profile.isActive
-        ? 'Verified Identity'
-        : 'Account Inactive';
-    final statusColor = widget.profile.isActive
-        ? const Color(0xFF17B26A)
-        : const Color(0xFFD92D20);
 
     return Scaffold(
       backgroundColor: _bg,
@@ -146,11 +132,7 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                           letterSpacing: -0.5,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      _summaryCard(statusText, statusColor, roleText),
-                      const SizedBox(height: 14),
-                      _quotaCard(),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       _buildVehiclesList(),
                       const SizedBox(height: 14),
                     ],
@@ -288,79 +270,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _summaryCard(String statusText, Color statusColor, String roleText) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF9FBFD),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Text(
-                'ACCOUNT SUMMARY',
-                style: TextStyle(
-                  color: Color(0xFF1D4268),
-                  letterSpacing: 2,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Spacer(),
-              Icon(
-                widget.profile.isActive ? Icons.verified : Icons.info_outline,
-                color: _blue,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Icons.circle, size: 8, color: statusColor),
-              const SizedBox(width: 8),
-              Text(
-                statusText,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Role: $roleText',
-            style: const TextStyle(fontSize: 12, color: _grey),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _quotaCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFDFF5EB),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFBAEAD4), width: 1),
-      ),
-      child: Text(
-        'Quota liters: ${_totalRemainingQuota.toStringAsFixed(2)}/${_totalQuotaLimit.toStringAsFixed(2)} L\nQueue readiness: ${_isEligibleToJoin ? "Ready to join" : "No quota remaining"}',
-        style: const TextStyle(
-          color: Color(0xFF17624D),
-          fontSize: 12,
-          height: 1.5,
-        ),
       ),
     );
   }

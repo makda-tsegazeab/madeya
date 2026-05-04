@@ -748,10 +748,12 @@ class _StationWorkerDashboardPageState
       );
     }
 
-    final stationName = _stationData!['name'] ?? 'Unknown Station';
-    final address = _stationData!['address'] ?? '';
-    final city = _stationData!['city'] ?? '';
-    final fuelStatus = _stationData!['fuelStatus'] ?? 'UNKNOWN';
+    final stationName = (_stationData!['name'] ?? 'Assigned station').toString();
+    final phone = _stationData!['phone']?.toString();
+    final isActive = _stationData!['isActive'] == true;
+    final queueIntakePaused = _stationData!['queueIntakePaused'] == true;
+    final latitude = _stationData!['latitude']?.toString();
+    final longitude = _stationData!['longitude']?.toString();
 
     return Container(
       width: double.infinity,
@@ -800,11 +802,15 @@ class _StationWorkerDashboardPageState
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$address, $city',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF6B7280),
-                      ),
+                      [
+                        if (phone != null && phone.trim().isNotEmpty) phone.trim(),
+                        if (latitude != null &&
+                            longitude != null &&
+                            latitude.trim().isNotEmpty &&
+                            longitude.trim().isNotEmpty)
+                          '${latitude.trim()}, ${longitude.trim()}',
+                      ].join(' • '),
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -816,7 +822,25 @@ class _StationWorkerDashboardPageState
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _buildInfoItem('Operational status', fuelStatus)),
+              _statusChip(
+                label: isActive ? 'OPEN' : 'CLOSED',
+                bg: isActive ? const Color(0xFFDBEAFE) : const Color(0xFFFEE2E2),
+                fg: isActive ? const Color(0xFF1E40AF) : const Color(0xFF991B1B),
+                icon: isActive ? Icons.check_circle_outline : Icons.block,
+              ),
+              const SizedBox(width: 8),
+              _statusChip(
+                label: queueIntakePaused ? 'INTAKE PAUSED' : 'INTAKE ACTIVE',
+                bg: queueIntakePaused
+                    ? const Color(0xFFFFEDD5)
+                    : const Color(0xFFDCFCE7),
+                fg: queueIntakePaused
+                    ? const Color(0xFF9A3412)
+                    : const Color(0xFF166534),
+                icon: queueIntakePaused
+                    ? Icons.pause_circle_outline
+                    : Icons.play_circle_outline,
+              ),
             ],
           ),
         ],
@@ -824,32 +848,30 @@ class _StationWorkerDashboardPageState
     );
   }
 
-  Widget _buildInfoItem(String label, String value) {
+  Widget _statusChip({
+    required String label,
+    required Color bg,
+    required Color fg,
+    required IconData icon,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(10),
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          Icon(icon, size: 16, color: fg),
+          const SizedBox(width: 6),
           Text(
-            label.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
-              color: Color(0xFF6B7280),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF111317),
+            label,
+            style: TextStyle(
+              color: fg,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.6,
             ),
           ),
         ],
@@ -868,24 +890,6 @@ class _StationWorkerDashboardPageState
             label: 'HOME',
             active: true,
             onTap: () {},
-          ),
-          _navItem(
-            icon: Icons.local_gas_station_rounded,
-            label: 'STATIONS',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Station features coming soon!')),
-              );
-            },
-          ),
-          _navItem(
-            icon: Icons.qr_code_scanner_rounded,
-            label: 'QUEUE',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Queue management coming soon!')),
-              );
-            },
           ),
           _navItem(
             icon: Icons.history_rounded,

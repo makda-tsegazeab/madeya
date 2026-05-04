@@ -68,32 +68,29 @@ class _StationWorkerDashboardPageState
         throw Exception('No authentication token found.');
       }
 
-      if (widget.profile.stationId == null) {
-        setState(() {
-          _errorMessage = 'No station assigned to this worker.';
-          _isLoading = false;
-        });
-        return;
-      }
-
       final response = await http.get(
-        Uri.parse(
-          '${AppConfig.apiBaseUrl}/station-manager/stations/${widget.profile.stationId}',
-        ),
+        Uri.parse('${AppConfig.apiBaseUrl}/queue/worker/station'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
       );
 
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
+      final payload = _tryDecodeJson(response.body);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (payload is! Map<String, dynamic> || payload['success'] != true) {
+          throw Exception(_extractMessage(payload) ?? 'Failed to load station info');
+        }
+
         setState(() {
-          _stationData = jsonData['data'] as Map<String, dynamic>?;
+          _stationData = payload['data'] as Map<String, dynamic>?;
           _isLoading = false;
         });
       } else {
-        throw Exception('Failed to load station info');
+        final message =
+            _extractMessage(payload) ?? 'Failed to load station info (${response.statusCode})';
+        throw Exception(message);
       }
     } catch (e) {
       setState(() {
@@ -101,6 +98,21 @@ class _StationWorkerDashboardPageState
         _isLoading = false;
       });
     }
+  }
+
+  Object? _tryDecodeJson(String body) {
+    try {
+      return jsonDecode(body);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String? _extractMessage(Object? payload) {
+    if (payload is! Map<String, dynamic>) return null;
+    final m = payload['message'];
+    if (m is String && m.trim().isNotEmpty) return m;
+    return null;
   }
 
   Future<void> _scanQr() async {

@@ -41,22 +41,12 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
   String? _errorMessage;
   int _unreadNotifications = 0;
 
-  int get _registeredVehiclesCount => _vehicles.length;
-  int get _activeQuotasCount =>
-      _vehicles.where((v) => (v.remainingLiters ?? 0) > 0).length;
   double get _totalRemainingQuota =>
       _vehicles.fold(0, (sum, v) => sum + (v.remainingLiters ?? 0));
   double get _totalQuotaLimit =>
       _vehicles.fold(0, (sum, v) => sum + (v.litersLimit ?? 0));
   bool get _isEligibleToJoin =>
       _vehicles.any((v) => (v.remainingLiters ?? 0) > 0);
-
-  Announcement? get _latestAnnouncement {
-    if (_announcements.isEmpty) return null;
-    final list = [..._announcements];
-    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return list.first;
-  }
 
   @override
   void initState() {
@@ -162,8 +152,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                       _quotaCard(),
                       const SizedBox(height: 14),
                       _buildVehiclesList(),
-                      const SizedBox(height: 12),
-                      _noticeCard(),
                       const SizedBox(height: 14),
                     ],
                   ),
@@ -352,47 +340,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
             'Role: $roleText',
             style: const TextStyle(fontSize: 12, color: _grey),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _miniStat(
-                  'Registered\nVehicles',
-                  '$_registeredVehiclesCount',
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _miniStat('Active\nQuotas', '$_activeQuotasCount'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _miniStat(String label, String value) {
-    return Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0F2F5),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 10, color: _grey)),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              color: _blue,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
         ],
       ),
     );
@@ -456,7 +403,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
 
   Widget _vehicleCard(Vehicle v) {
     final accent = v.progressColor;
-    final canJoin = v.isActive && (v.remainingLiters ?? 0) > 0;
 
     void openDetails() {
       Navigator.push(
@@ -466,15 +412,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
             vehicleId: v.id,
             previewPlate: v.plateNumber,
           ),
-        ),
-      );
-    }
-
-    void openStationsForVehicle() {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => StationsPage(prefillVehicleId: v.id),
         ),
       );
     }
@@ -647,57 +584,29 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: openDetails,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: _blue,
-                              side: const BorderSide(
-                                color: Color(0xFF77AEE9),
-                                width: 1.2,
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              'Details',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                              ),
-                            ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: openDetails,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: _blue,
+                          side: const BorderSide(
+                            color: Color(0xFF77AEE9),
+                            width: 1.2,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: canJoin ? openStationsForVehicle : null,
-                            icon: const Icon(Icons.groups_2_rounded, size: 18),
-                            label: const Text(
-                              'Join Queue',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _blue,
-                              foregroundColor: Colors.white,
-                              disabledBackgroundColor: const Color(0xFFE5E7EB),
-                              disabledForegroundColor: const Color(0xFF9CA3AF),
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
+                        child: const Text(
+                          'Details',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -705,55 +614,6 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _noticeCard() {
-    final latest = _latestAnnouncement;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF6F8FA),
-        borderRadius: BorderRadius.circular(18),
-        border: const Border(
-          left: BorderSide(color: Color(0xFF8E4A14), width: 3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.campaign_rounded, size: 17, color: Color(0xFF7B3F15)),
-              SizedBox(width: 8),
-              Text(
-                'LATEST ANNOUNCEMENT',
-                style: TextStyle(
-                  color: _dark,
-                  fontSize: 13,
-                  letterSpacing: 1.1,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            latest?.title ?? 'No announcement available',
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            latest?.body ?? 'Announcements from admins will appear here.',
-            style: const TextStyle(
-              color: Color(0xFF2E3644),
-              fontSize: 11.5,
-              height: 1.5,
-            ),
-          ),
-        ],
       ),
     );
   }

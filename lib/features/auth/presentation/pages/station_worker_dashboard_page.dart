@@ -7,6 +7,7 @@ import '../../data/auth_service.dart';
 import '../../data/token_storage.dart';
 import '../../../queue/data/worker_queue_service.dart';
 import '../../../queue/presentation/pages/worker_qr_scanner_page.dart';
+import '../../../transactions/presentation/pages/worker_history_page.dart';
 // // import 'change_password_page.dart'; // Not needed - using named routes
 
 class StationWorkerDashboardPage extends StatefulWidget {
@@ -895,8 +896,11 @@ class _StationWorkerDashboardPageState
             icon: Icons.history_rounded,
             label: 'HISTORY',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('History coming soon!')),
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) => const WorkerHistoryPage(),
+                ),
               );
             },
           ),

@@ -47,5 +47,9 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Scan QR codes to verify queue bookings.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app uses your location to find the nearest fuel stations and sort them by distance.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app uses your location to find the nearest fuel stations and sort them by distance.</string>
 </dict>
 </plist>

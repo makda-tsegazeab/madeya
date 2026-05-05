@@ -1,3 +1,6 @@
+import 'dart:math';
+import '../../../core/services/location_service.dart';
+
 class Station {
   const Station({
     required this.id,
@@ -8,6 +11,7 @@ class Station {
     this.latitude,
     this.longitude,
     this.phone,
+    this.distanceFromUser,
   });
 
   final int id;
@@ -18,6 +22,7 @@ class Station {
   final String? latitude;
   final String? longitude;
   final String? phone;
+  final double? distanceFromUser;
 
   factory Station.fromJson(Map<String, dynamic> json) {
     return Station(
@@ -29,6 +34,30 @@ class Station {
       latitude: json['latitude']?.toString(),
       longitude: json['longitude']?.toString(),
       phone: json['phone']?.toString(),
+    );
+  }
+
+  Station copyWith({
+    int? id,
+    String? name,
+    bool? isActive,
+    bool? queueIntakePaused,
+    int? activeQueueLength,
+    String? latitude,
+    String? longitude,
+    String? phone,
+    double? distanceFromUser,
+  }) {
+    return Station(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      isActive: isActive ?? this.isActive,
+      queueIntakePaused: queueIntakePaused ?? this.queueIntakePaused,
+      activeQueueLength: activeQueueLength ?? this.activeQueueLength,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      phone: phone ?? this.phone,
+      distanceFromUser: distanceFromUser ?? this.distanceFromUser,
     );
   }
 
@@ -47,5 +76,26 @@ class Station {
       return '$lat, $lng';
     }
     return phone ?? 'No location info';
+  }
+
+  String get distanceText {
+    if (distanceFromUser == null) return '';
+    return LocationService.formatDistance(distanceFromUser!);
+  }
+
+  bool get hasValidCoordinates {
+    final lat = latitude;
+    final lng = longitude;
+    return lat != null && lng != null && lat.isNotEmpty && lng.isNotEmpty;
+  }
+
+  double? get latitudeAsDouble {
+    if (latitude == null || latitude!.isEmpty) return null;
+    return double.tryParse(latitude!);
+  }
+
+  double? get longitudeAsDouble {
+    if (longitude == null || longitude!.isEmpty) return null;
+    return double.tryParse(longitude!);
   }
 }

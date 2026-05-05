@@ -26,10 +26,14 @@ class ConfigureBookingPage extends StatefulWidget {
 }
 
 class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
-  static const Color _bg = Color(0xFFF9FAFB);
-  static const Color _blue = Color(0xFF0B4D8B);
-  static const Color _dark = Color(0xFF111827);
+  static const Color _bg = Color(0xFFF8FAFC);
+  static const Color _primary = Color(0xFF3B82F6);
+  static const Color _primaryDark = Color(0xFF2563EB);
+  static const Color _accent = Color(0xFF10B981);
+  static const Color _dark = Color(0xFF1F2937);
   static const Color _greyText = Color(0xFF6B7280);
+  static const Color _cardBg = Color(0xFFFFFFFF);
+  static const Color _inputBg = Color(0xFFF9FAFB);
 
   final TokenStorage _tokenStorage = SecureTokenStorage();
   final VehicleService _vehicleService = VehicleService();
@@ -244,20 +248,29 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
     return Scaffold(
       backgroundColor: _bg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: _cardBg,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: _blue),
-          onPressed: () => Navigator.maybePop(context),
+        shadowColor: Colors.black.withOpacity(0.1),
+        leading: Container(
+          margin: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
+          decoration: BoxDecoration(
+            color: _primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back, color: _primary, size: 20),
+            onPressed: () => Navigator.maybePop(context),
+          ),
         ),
         title: const Text(
           'Configure Booking',
           style: TextStyle(
-            color: _blue,
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
+            color: _dark,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
           ),
         ),
+        centerTitle: true,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -276,11 +289,13 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
             child: ElevatedButton(
               onPressed: _canSubmit ? _submit : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _blue,
-                disabledBackgroundColor: const Color(0xFF9CA3AF),
+                backgroundColor: _primary,
+                disabledBackgroundColor: const Color(0xFFD1D5DB),
                 foregroundColor: Colors.white,
+                elevation: 0,
+                shadowColor: _primary.withOpacity(0.3),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
               child: _isSubmitting
@@ -336,7 +351,7 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
           child: ElevatedButton(
             onPressed: onRetry,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _blue,
+              backgroundColor: _primary,
               foregroundColor: Colors.white,
             ),
             child: const Text('Retry'),
@@ -487,22 +502,27 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
         ? 'INTAKE PAUSED'
         : 'OPEN';
     final badgeColor = intakeOk
-        ? const Color(0xFF1E40AF)
-        : const Color(0xFF991B1B);
+        ? _primary
+        : const Color(0xFFEF4444);
     final badgeBg = intakeOk
-        ? const Color(0xFFDBEAFE)
+        ? _primary.withOpacity(0.1)
         : const Color(0xFFFEE2E2);
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        color: _cardBg,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: _primary.withOpacity(0.05),
+            blurRadius: 40,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -511,27 +531,35 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
         children: [
           Row(
             children: [
-              const Text(
-                'STATION',
-                style: TextStyle(
-                  color: _greyText,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.8,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'STATION',
+                  style: TextStyle(
+                    color: _primary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                  ),
                 ),
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: badgeBg,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: badgeColor.withOpacity(0.3), width: 1),
                 ),
                 child: Text(
                   badgeText,
                   style: TextStyle(
                     color: badgeColor,
-                    fontSize: 8,
+                    fontSize: 10,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
                   ),
@@ -543,26 +571,40 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
           Text(
             widget.station.name,
             style: const TextStyle(
-              color: _blue,
-              fontSize: 18,
+              color: _dark,
+              fontSize: 20,
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.queue, size: 14, color: _greyText),
-              const SizedBox(width: 4),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: _primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.queue, size: 14, color: _primary),
+              ),
+              const SizedBox(width: 8),
               Text(
                 '${widget.station.activeQueueLength} in line now',
-                style: const TextStyle(fontSize: 12, color: _greyText),
+                style: const TextStyle(fontSize: 13, color: _greyText, fontWeight: FontWeight.w500),
               ),
-              const SizedBox(width: 12),
-              const Icon(Icons.local_gas_station, size: 14, color: _greyText),
-              const SizedBox(width: 4),
+              const SizedBox(width: 16),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: _accent.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.local_gas_station, size: 14, color: _accent),
+              ),
+              const SizedBox(width: 8),
               Text(
                 widget.station.fuelStatusLabel,
-                style: const TextStyle(fontSize: 12, color: _greyText),
+                style: const TextStyle(fontSize: 13, color: _greyText, fontWeight: FontWeight.w500),
               ),
             ],
           ),
@@ -587,19 +629,34 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
 
   Widget _vehicleDropdown() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE5E7EB),
-        borderRadius: BorderRadius.circular(10),
+        color: _inputBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<Vehicle>(
           value: _selectedVehicle,
           isExpanded: true,
-          icon: const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: _greyText,
-            size: 20,
+          icon: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: _primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: _primary,
+              size: 20,
+            ),
           ),
           style: const TextStyle(
             color: _dark,
@@ -667,24 +724,50 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
     if (quota == null) return const SizedBox.shrink();
     final periodNames = quota.periods.map((p) => p.period).join(' • ');
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFECFDF5),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFA7F3D0)),
+        gradient: LinearGradient(
+          colors: [_accent.withOpacity(0.1), _accent.withOpacity(0.05)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _accent.withOpacity(0.3), width: 1.5),
       ),
       child: Row(
         children: [
-          const Icon(Icons.shield_outlined, color: Color(0xFF047857), size: 18),
-          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: _accent,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.shield_outlined, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              'Remaining: ${quota.remainingLiters.toStringAsFixed(2)} L of ${quota.litersLimit.toStringAsFixed(2)} L${periodNames.isEmpty ? '' : ' ($periodNames)'}',
-              style: const TextStyle(
-                color: Color(0xFF065F46),
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Fuel Quota Available',
+                  style: TextStyle(
+                    color: _accent,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${quota.remainingLiters.toStringAsFixed(2)} L of ${quota.litersLimit.toStringAsFixed(2)} L${periodNames.isEmpty ? '' : ' ($periodNames)'}',
+                  style: const TextStyle(
+                    color: Color(0xFF064E3B),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -694,19 +777,34 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
 
   Widget _fuelDropdown() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE5E7EB),
-        borderRadius: BorderRadius.circular(10),
+        color: _inputBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<FuelPrice>(
           value: _selectedFuelPrice,
           isExpanded: true,
-          icon: const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: _greyText,
-            size: 20,
+          icon: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: _primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: _primary,
+              size: 20,
+            ),
           ),
           style: const TextStyle(
             color: _dark,
@@ -752,20 +850,28 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
       },
       decoration: InputDecoration(
         filled: true,
-        fillColor: const Color(0xFFE5E7EB),
+        fillColor: _inputBg,
         suffixText: 'LTR',
         suffixStyle: const TextStyle(
-          color: _blue,
-          fontSize: 12,
+          color: _primary,
+          fontSize: 13,
           fontWeight: FontWeight.w800,
         ),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 12,
+          horizontal: 16,
+          vertical: 16,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: _primary, width: 2),
         ),
       ),
       style: const TextStyle(
@@ -787,17 +893,33 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
         return null;
       },
       decoration: InputDecoration(
-        hintText: '+251911234567',
+        hintText: '+251914******',
         filled: true,
-        fillColor: const Color(0xFFE5E7EB),
-        prefixIcon: const Icon(Icons.phone, color: _greyText, size: 18),
+        fillColor: _inputBg,
+        prefixIcon: Container(
+          margin: const EdgeInsets.only(right: 12),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: _primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(Icons.phone, color: _primary, size: 18),
+        ),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 12,
+          horizontal: 16,
+          vertical: 16,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: _primary, width: 2),
         ),
       ),
       style: const TextStyle(
@@ -811,28 +933,44 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
   Widget _summaryCard() {
     final showSubsidy = _subsidyPct > 0 && _grossAmount > 0;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [_cardBg, _cardBg],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: _primary.withOpacity(0.05),
+            blurRadius: 40,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'PAYMENT SUMMARY',
-            style: TextStyle(
-              color: _greyText,
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              'PAYMENT SUMMARY',
+              style: TextStyle(
+                color: _primary,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8,
+              ),
             ),
           ),
           const SizedBox(height: 10),
@@ -864,8 +1002,8 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
               Text(
                 '${_amountDue.toStringAsFixed(2)} ETB',
                 style: const TextStyle(
-                  color: _blue,
-                  fontSize: 22,
+                  color: _primary,
+                  fontSize: 24,
                   fontWeight: FontWeight.w800,
                 ),
               ),

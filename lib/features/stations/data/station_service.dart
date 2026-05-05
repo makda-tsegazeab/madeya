@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
 import '../../../core/config/app_config.dart';
+import '../../../core/services/location_service.dart';
 import 'station_model.dart';
 
 class StationService {
@@ -56,6 +58,56 @@ class StationService {
       client.close();
     }
   }
+
+  Future<List<Station>> getStationsSortedByDistance(String token) async {
+  try {
+    // Get user's current location
+    final userPosition = await LocationService.getCurrentLocation();
+    if (userPosition == null) {
+      // If location is not available, return regular stations list
+      return getStations(token);
+    }
+
+    // Get all stations
+    final stations = await getStations(token);
+    
+    // Calculate distance for each station and sort
+    final stationsWithDistance = <Station>[];
+    
+    for (final station in stations) {
+      double? distance;
+      
+      if (station.hasValidCoordinates) {
+        final stationLat = station.latitudeAsDouble;
+        final stationLng = station.longitudeAsDouble;
+        
+        if (stationLat != null && stationLng != null) {
+          distance = LocationService.calculateDistance(
+            userPosition.latitude,
+            userPosition.longitude,
+            stationLat,
+            stationLng,
+          );
+        }
+      }
+      
+      stationsWithDistance.add(station.copyWith(distanceFromUser: distance));
+    }
+    
+    // Sort stations by distance (null distances go to the end)
+    stationsWithDistance.sort((a, b) {
+      if (a.distanceFromUser == null && b.distanceFromUser == null) return 0;
+      if (a.distanceFromUser == null) return 1;
+      if (b.distanceFromUser == null) return -1;
+      return a.distanceFromUser!.compareTo(b.distanceFromUser!);
+    });
+    
+    return stationsWithDistance;
+  } catch (e) {
+    // If location fails, fall back to regular stations list
+    return getStations(token);
+  }
+}
 
   bool _isRetriableStatus(int statusCode) =>
       statusCode == 429 || (statusCode >= 500 && statusCode < 600);

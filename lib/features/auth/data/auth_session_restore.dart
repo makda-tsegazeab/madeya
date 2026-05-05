@@ -37,6 +37,7 @@ AuthUserProfile? profileFromUserJson(Map<String, dynamic>? user) {
     isActive: isActive,
     createdAt: createdAt,
     updatedAt: updatedAt,
+    phoneNumber: user['phoneNumber']?.toString(),
   );
 }
 

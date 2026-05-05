@@ -9,6 +9,7 @@ class AuthUserProfile {
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
+    this.phoneNumber,
   });
 
   final String id;
@@ -20,6 +21,7 @@ class AuthUserProfile {
   final bool isActive;
   final String createdAt;
   final String updatedAt;
+  final String? phoneNumber;
 }
 
 class AuthSession {

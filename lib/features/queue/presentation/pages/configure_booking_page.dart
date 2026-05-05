@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../auth/data/token_storage.dart';
+import '../../../auth/data/auth_service.dart';
 import '../../../stations/data/station_model.dart';
 import '../../../vehicles/data/vehicle_model.dart';
 import '../../../vehicles/data/vehicle_service.dart';
@@ -36,6 +37,7 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
   static const Color _inputBg = Color(0xFFF9FAFB);
 
   final TokenStorage _tokenStorage = SecureTokenStorage();
+  late final AuthService _authService;
   final VehicleService _vehicleService = VehicleService();
   final PaymentService _paymentService = PaymentService();
 
@@ -59,10 +61,13 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
 
   bool _isSubmitting = false;
   String? _submissionError;
+  
+  AuthUserProfile? _currentUser;
 
   @override
   void initState() {
     super.initState();
+    _authService = AuthServiceImpl(tokenStorage: _tokenStorage);
     _loadInitial();
   }
 
@@ -83,6 +88,16 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
       if (token == null) {
         throw Exception('Session expired. Please login again.');
       }
+      
+      // Fetch user profile
+      final session = await _authService.restoreSession();
+      _currentUser = session?.user;
+      
+      // Pre-fill phone number if available
+      if (_currentUser?.phoneNumber != null) {
+        _phoneController.text = _currentUser!.phoneNumber!;
+      }
+      
       final results = await Future.wait([
         _vehicleService.getVehicles(token),
         _paymentService.listFuelPrices(token),
@@ -724,53 +739,190 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
     }
     final quota = _quota;
     if (quota == null) return const SizedBox.shrink();
-    final periodNames = quota.periods.map((p) => p.period).join(' • ');
+    
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [_accent.withOpacity(0.1), _accent.withOpacity(0.05)],
+          colors: [_accent.withOpacity(0.12), _accent.withOpacity(0.04)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: _accent.withOpacity(0.3), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: _accent.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _accent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.verified_user, color: Colors.white, size: 18),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Your Fuel Quota',
+                      style: TextStyle(
+                        color: _accent,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${quota.remainingLiters.toStringAsFixed(1)} L available',
+                      style: const TextStyle(
+                        color: Color(0xFF064E3B),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...quota.periods.map((period) => _buildQuotaPeriod(period)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuotaPeriod(QuotaPeriod period) {
+    final limit = period.litersLimit;
+    final remaining = period.remainingLiters;
+    final used = limit - remaining;
+    final percentage = limit > 0 ? (remaining / limit) * 100 : 0;
+    
+    Color getProgressColor() {
+      if (percentage > 50) return Colors.green;
+      if (percentage > 20) return Colors.orange;
+      return Colors.red;
+    }
+    
+    final progressColor = getProgressColor();
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: _accent,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.shield_outlined, color: Colors.white, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
+          // Period label and percentage
+          SizedBox(
+            width: 50,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Fuel Quota Available',
+                Text(
+                  period.period.substring(0, 3).toUpperCase(),
                   style: TextStyle(
-                    color: _accent,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                    color: _dark,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '${quota.remainingLiters.toStringAsFixed(2)} L of ${quota.litersLimit.toStringAsFixed(2)} L${periodNames.isEmpty ? '' : ' ($periodNames)'}',
-                  style: const TextStyle(
-                    color: Color(0xFF064E3B),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
+                Container(
+                  margin: const EdgeInsets.only(top: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: progressColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '${percentage.toStringAsFixed(0)}%',
+                    style: TextStyle(
+                      color: progressColor.withOpacity(0.9),
+                      fontSize: 8,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: 8),
+          // Progress bar
+          Expanded(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 4,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(2),
+                    color: Colors.grey.withOpacity(0.2),
+                  ),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: percentage / 100,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(2),
+                        gradient: LinearGradient(
+                          colors: [progressColor.withOpacity(0.8), progressColor],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${used.toStringAsFixed(1)} L used',
+                  style: const TextStyle(
+                    color: _greyText,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Liters info
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${remaining.toStringAsFixed(1)} L',
+                style: const TextStyle(
+                  color: Color(0xFF064E3B),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              Text(
+                'of ${limit.toStringAsFixed(1)} L',
+                style: const TextStyle(
+                  color: _greyText,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
         ],
       ),

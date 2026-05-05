@@ -95,7 +95,7 @@ class _StationWorkerDashboardPageState
       }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = _humanizeError(e);
         _isLoading = false;
       });
     }
@@ -114,6 +114,14 @@ class _StationWorkerDashboardPageState
     final m = payload['message'];
     if (m is String && m.trim().isNotEmpty) return m;
     return null;
+  }
+
+  String _humanizeError(Object error) {
+    final raw = error.toString().trim();
+    if (raw.startsWith('Exception: ')) {
+      return raw.substring('Exception: '.length).trim();
+    }
+    return raw;
   }
 
   Future<void> _scanQr() async {
@@ -167,7 +175,7 @@ class _StationWorkerDashboardPageState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _verifyError = e.toString();
+        _verifyError = _humanizeError(e);
         _isVerifying = false;
       });
     }
@@ -203,19 +211,43 @@ class _StationWorkerDashboardPageState
       if (!mounted) return;
       setState(() {
         _completePayload = data;
+        _completeError = null;
+        _verifyError = null;
+        final current = _verifiedPayload;
+        if (current != null) {
+          final bookingRaw = current['booking'];
+          final booking =
+              bookingRaw is Map<String, dynamic> ? bookingRaw : <String, dynamic>{};
+          _verifiedPayload = {
+            ...current,
+            'booking': {
+              ...booking,
+              'status': 'SERVED',
+            },
+            'transaction': {
+              'id': data['transactionId'],
+              'litersDispensed': data['litersDispensed'],
+              'receiptRef': data['receiptRef'],
+              'servedAt': data['servedAt'],
+            },
+          };
+        }
         _isCompleting = false;
       });
 
-      // Refresh details so UI reflects SERVED state.
-      await _verifyToken();
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Booking completed')),
+        SnackBar(
+          content: Text(
+            data['created'] == true
+                ? 'Booking completed'
+                : 'Booking already completed',
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _completeError = e.toString();
+        _completeError = _humanizeError(e);
         _isCompleting = false;
       });
     }

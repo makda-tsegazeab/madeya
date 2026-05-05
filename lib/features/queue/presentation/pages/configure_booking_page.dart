@@ -500,12 +500,14 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
         ? 'CLOSED'
         : widget.station.queueIntakePaused
         ? 'INTAKE PAUSED'
+        : widget.station.distanceFromUser != null
+        ? widget.station.distanceText
         : 'OPEN';
     final badgeColor = intakeOk
-        ? _primary
+        ? Colors.orange
         : const Color(0xFFEF4444);
     final badgeBg = intakeOk
-        ? _primary.withOpacity(0.1)
+        ? Colors.orange.withOpacity(0.1)
         : const Color(0xFFFEE2E2);
 
     return Container(
@@ -608,7 +610,7 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
               ),
             ],
           ),
-          if (!intakeOk) ...[
+                    if (!intakeOk) ...[
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(10),

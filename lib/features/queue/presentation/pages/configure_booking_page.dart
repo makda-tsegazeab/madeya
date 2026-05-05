@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../auth/data/token_storage.dart';
 import '../../../auth/data/auth_service.dart';
@@ -187,6 +188,77 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
       _litersValue <= _maxQuota &&
       _phoneController.text.trim().length >= 9 &&
       widget.station.acceptsQueueJoins;
+
+  Future<void> _openInGoogleMaps() async {
+    final lat = widget.station.latitudeAsDouble;
+    final lng = widget.station.longitudeAsDouble;
+    
+    // Try Google Maps app first (most reliable)
+    if (lat != null && lng != null) {
+      // Use Google Maps app with coordinates
+      final mapsUrl = 'https://maps.google.com/maps?q=$lat,$lng';
+      final uri = Uri.parse(mapsUrl);
+      
+      print('Attempting Google Maps with coordinates: $mapsUrl');
+      
+      try {
+        if (await canLaunchUrl(uri)) {
+          print('Launching Google Maps with coordinates');
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+          return;
+        } else {
+          print('Google Maps app not available, trying browser');
+        }
+      } catch (e) {
+        print('Error launching Google Maps: $e');
+      }
+    }
+    
+    // Fallback: try with station name
+    final stationName = Uri.encodeComponent(widget.station.name);
+    final searchUrl = 'https://maps.google.com/maps?q=$stationName';
+    final searchUri = Uri.parse(searchUrl);
+    
+    print('Attempting Google Maps with station name: $searchUrl');
+    
+    try {
+      if (await canLaunchUrl(searchUri)) {
+        print('Launching Google Maps with station name');
+        await launchUrl(searchUri, mode: LaunchMode.externalApplication);
+        return;
+      } else {
+        print('Google Maps not available, trying generic approach');
+      }
+    } catch (e) {
+      print('Error launching Google Maps search: $e');
+    }
+    
+    // Last resort: try generic URL without canLaunchUrl check
+    try {
+      final fallbackUrl = lat != null && lng != null 
+          ? 'https://www.google.com/maps/search/?api=1&query=$lat,$lng'
+          : 'https://www.google.com/maps/search/?api=1&query=$stationName';
+      
+      print('Last resort attempt: $fallbackUrl');
+      await launchUrl(
+        Uri.parse(fallbackUrl),
+        mode: LaunchMode.externalApplication,
+      );
+      return;
+    } catch (e) {
+      print('All attempts failed: $e');
+    }
+    
+    // If everything failed
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not open maps. Please check your internet connection.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+  }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -624,6 +696,24 @@ class _ConfigureBookingPageState extends State<ConfigureBookingPage> {
                 style: const TextStyle(fontSize: 13, color: _greyText, fontWeight: FontWeight.w500),
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _openInGoogleMaps,
+              icon: const Icon(Icons.map, size: 16),
+              label: const Text('Open in Map'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _primary.withOpacity(0.1),
+                foregroundColor: _primary,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ),
                     if (!intakeOk) ...[
             const SizedBox(height: 8),
